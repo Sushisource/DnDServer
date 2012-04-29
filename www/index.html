@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>DnD Server</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <!-- Styles -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <style>
+      body {
+        /* 60px to make the container go all the way to the bottom of the topbar */
+        padding-top: 60px;
+      }
+    </style>
+
+    <!--Fav and touch icons -->
+    <link rel="shortcut icon" href="../assets/ico/favicon.ico">
+  </head>
+
+  <body>
+    <div class="navbar navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </a>
+          <a class="brand" href="#">DnD Server</a>
+          <div class="nav-collapse">
+            <ul class="nav">
+              <li class="active"><a href="#">main</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container-fluid">
+      <div class="row-fluid">
+        <div class="span2">
+          <div class="well" style="padding: 8px 0;">
+            <ul class="nav nav-tabs nav-stacked" id="initiativelist">
+              <li class="nav-header">
+              Initiative 
+              <a id="init_add" class="btn pull-right" href=#
+                style="padding:2px; height:15px; width:15px; margin:0 4px;">
+                <i class="icon-plus-sign"></i>
+              </a>
+              </li><br/>
+            </ul>
+          </div>
+        </div>
+        <div class="span10">
+          <!--Body content-->
+        </div>
+      </div>
+    </div> <!-- /container -->
+
+    <%block name="modals"/>
+
+    <!-- Javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/client.js"></script>
+    <script src="js/initiative.js"></script>
+  </body>
+</html>

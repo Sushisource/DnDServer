@@ -12,8 +12,15 @@ $j.dnd.post_to_chat = (user, message) ->
   if chatbox.children().length > 100
     chatbox.children().last().remove()
 
+sizechat = ->
+  pos = chatbox.position()
+  chatbox.height($j(window).height() - pos.top - 20)
+
 $j ->
   chatbox.show()
+  $j(window).resize ->
+    sizechat()
+  sizechat()
 
 chat = (msg) ->
   $j.dnd.post_to_chat(msg.name, msg.msg)

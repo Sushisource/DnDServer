@@ -30,7 +30,7 @@ class DnDSocket(WebSocket):
                 self.send_message('ouser_response', {'name': uname, 'id': id}, True)
         self.send_message('chat',
                 {'name': "Chief Ripnugget",
-                 'msg': "-----Welcome to DnD Server %s!-----" % uname})
+                 'msg': "Welcome to DnD Server %s!" % uname})
 
     def add_char(self, charname, initiative):
         if charname in self.ilist_chars:

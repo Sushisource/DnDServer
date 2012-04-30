@@ -3,3 +3,4 @@
 *.pyc
 *stackdump
 css/bootstrap.css
+js/*.js

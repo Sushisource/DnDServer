@@ -22,12 +22,19 @@
     return console.log(message);
   };
 
+  $j.dnd.validate = function(input) {
+    if (/[\\'"]/.test(input)) {
+      alert("Invalid input");
+      return false;
+    }
+    return true;
+  };
+
   init_websocket = function() {
     window.ws = new WebSocket("ws://192.168.1.10:9000/ws");
     window.ws.onopen = function(e) {
       console.log("Connected");
-      $j(".brand").css('color', 'white');
-      return window.ws.send("get_state()");
+      return $j(".brand").css('color', 'white');
     };
     window.ws.onmessage = function(e) {
       var dat, data, protocol;
@@ -40,7 +47,7 @@
     window.ws.onclose = function(e) {
       console.log("Lost connection");
       $j(".brand").css('color', 'red');
-      return init_websocket();
+      return location.reload();
     };
     return window.ws.onerror = function(e) {
       return console.log("Error: " + e.message);

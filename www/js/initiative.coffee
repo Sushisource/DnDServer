@@ -7,9 +7,17 @@ addchar_form = $j '#addchar_form'
 charname_input = $j '#charname'
 initiative_input = $j '#initiative'
 initiativelist = $j '#initiativelist'
+well = $j '#initlistwell'
 
 $j ->
+  well.show()
+  window.ws.send "get_state()"
+
   initadd.click ->
+    charname_input.val ""
+    initiative_input.val ""
+    addmodal.on 'shown', ->
+      charname_input.focus().select()
     addmodal.modal('toggle')
 
   addmodal.modal({
@@ -25,11 +33,12 @@ $j ->
     addchar_form.submit()
 
   addchar_form.submit ->
+    name = charname_input.val().trim()
     initv = initiative_input.val()
     if isNaN(initv) or initv is null or initv is ""
       alert("Initiative must be a number")
       return false
-    window.ws.send "add_char('#{charname_input.val()}',#{initv})"
+    window.ws.send "add_char('#{name}',#{initv})"
     addmodal.modal('toggle')
     return false
 
@@ -47,44 +56,41 @@ sort_initlist = ->
   $j.each listitems, ->
     initiativelist.append listitems
 
-m_add_char = (char, init) ->
-  item = "<li id='#{char}' class='hide initchar'><div class='pull-right' style='margin-top:5px;'>"
-  item += "<a class='badge badge-inverse' id='init_#{char}'>#{init}</a>"
-  item += """<a id='init_del_#{char}' class='btn' href=#
+add_char = (char) ->
+  item = "<li id='#{char.id}' class='hide initchar'><div class='pull-right' style='margin-top:5px;'>"
+  item += "<a class='badge badge-inverse' id='init_#{char.id}'>#{char.init}</a>"
+  item += """<a id='init_del_#{char.id}' class='btn' href=#
                   style='padding:2px; height:15px; width:15px; margin:0 5px;'>
                   <i class='icon-trash'></i>
                 </a></div>"""
-  item += "<a href='#'>#{char}</a></li>"
+  item += "<a href='#'>#{char.name}</a></li>"
   initiativelist.append(item).children(':last').fadeIn(200)
   #Add function handles to buttons / badge
-  $j("#init_del_#{char}").click ->
-    window.ws.send "del_char('#{char}')"
-  $j("#init_#{char}").click ->
+  $j("#init_del_#{char.id}").click ->
+    window.ws.send "del_char('#{char.name}')"
+  $j("#init_#{char.id}").click ->
     change_init char
-
-add_char = (char) ->
-  m_add_char(char.name, char.init)
   sort_initlist()
 
 upd_char = (char) ->
-  $j("#init_#{char.name}").html char.init
-  0
+  $j("#init_#{char.id}").html char.init
+  sort_initlist()
 
 del_char = (char) ->
-  $j("##{char}").fadeOut ->
-    $j("##{char}").remove()
+  $j("##{char.id}").fadeOut ->
+    $j("##{char.id}").remove()
 
 change_init = (char) ->
-  charname_input.val char
-  initiative_input.val $j("#init_#{char}").html()
+  charname_input.val char.name
+  initiative_input.val $j("#init_#{char.id}").html()
+  addmodal.on 'shown', ->
+    initiative_input.focus().select()
   addmodal.modal 'toggle'
-  document.getElementById('initiative').focus()
 
 init_initlist = (chars) ->
   initiativelist.children('.initchar').remove()
-  for char, init of chars
-    m_add_char(char, init)
-  sort_initlist()
+  for char, charobj of chars
+    add_char(charobj)
 
 $j.dnd.callbacks['initlist'] = init_initlist
 $j.dnd.callbacks['addchar'] = add_char

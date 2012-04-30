@@ -28,6 +28,7 @@ class Root(object):
 if __name__ == '__main__':
     cp.config.update({'server.socket_host': '0.0.0.0',
                       'server.socket_port': 9000,
+                      'autoreload.on': False,
                       'tools.staticdir.root': rootdir})
 
     WebSocketPlugin(cp.engine).subscribe()
@@ -40,7 +41,4 @@ if __name__ == '__main__':
         },
         '/': {
             'tools.staticdir.on': True,
-            'tools.staticdir.dir': '.'
-        }
-    }
-    )
+            'tools.staticdir.dir': '.'}})

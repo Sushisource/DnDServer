@@ -12,13 +12,19 @@ dispatch = (protocol, data) ->
 echo = (message) ->
   console.log message
 
+$j.dnd.validate = (input) ->
+  if /[\\'"]/.test(input)
+    alert("Invalid input")
+    return false
+  return true
+
+
 init_websocket = ->
   #Setup websockets
   window.ws = new WebSocket "ws://192.168.1.10:9000/ws"
   window.ws.onopen = (e) ->
     console.log "Connected"
     $j(".brand").css('color', 'white')
-    window.ws.send "get_state()"
   window.ws.onmessage = (e) ->
     dat = JSON.parse(e.data)
     protocol = dat[0]
@@ -28,8 +34,8 @@ init_websocket = ->
   window.ws.onclose = (e) ->
     console.log "Lost connection"
     $j(".brand").css('color', 'red')
-    #Try to reconnect
-    init_websocket()
+    #Just refresh
+    location.reload()
   window.ws.onerror = (e) ->
     console.log "Error: " + e.message
 

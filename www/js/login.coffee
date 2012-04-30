@@ -34,7 +34,7 @@ otheruser_response = (msg) ->
   if $j("#ouser_label_#{id}").length != 0
     return
   userlabel.after """
-  <span class='label'
+  <span class='label label-success'
                 id='ouser_label_#{id}' style='vertical-align: bottom'>#{name}</span>"""
 
 deluser = (id) ->

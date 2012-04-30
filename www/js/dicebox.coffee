@@ -15,3 +15,8 @@ $j ->
     return if not $j.dnd.validate(instr)
     window.ws.send "dicebox('#{instr}')"
     return false
+
+diceroll = (result) ->
+  $j.dnd.post_to_chat(result.name, "Rolls #{result.result}")
+
+$j.dnd.callbacks['diceroll'] = diceroll

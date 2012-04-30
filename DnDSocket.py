@@ -20,7 +20,6 @@ class DnDSocket(WebSocket):
             except AttributeError:
                 print "Couldn't run: %s" % message.data
 
-
     def get_state(self):
         greet ="Sending state\n"
         self.send_message("echo", greet, True)
@@ -29,7 +28,9 @@ class DnDSocket(WebSocket):
         for id, uname in self.users.items():
             if id is not self.m_uid:
                 self.send_message('ouser_response', {'name': uname, 'id': id}, True)
-
+        self.send_message('chat',
+                {'name': "Chief Ripnugget",
+                 'msg': "-----Welcome to DnD Server %s!-----" % uname})
 
     def add_char(self, charname, initiative):
         if charname in self.ilist_chars:
@@ -70,7 +71,8 @@ class DnDSocket(WebSocket):
 
     def dicebox(self, rollstr):
         result = rollDice(rollstr)
-        print "Diceroll result: %s" % result
+        self.send_message("diceroll",
+                {'result': result, 'name': self.users[self.m_uid]})
 
     def ekko(self, msg):
         self.send_message('echo', msg)

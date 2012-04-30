@@ -11,7 +11,6 @@ well = $j '#initlistwell'
 
 $j ->
   well.show()
-  window.ws.send "get_state()"
 
   initadd.click ->
     charname_input.val ""

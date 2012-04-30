@@ -1,0 +1,15 @@
+.chatitem {
+    margin: 3px 0;
+}
+
+.username {
+    width: auto !important;
+    margin-left: 0 !important;
+    min-height: 0 !important;
+}
+
+.chatmsg {
+    width: auto !important;
+    margin-left: 5px !important;
+    min-height: 0 !important;
+}

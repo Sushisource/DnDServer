@@ -1,6 +1,5 @@
 from DnDSocket import DnDSocket
-import os
-
+import os, fileinput as fip, re, socket, sys
 import cherrypy as cp
 from ws4py.server.cherrypyserver import WebSocketPlugin, WebSocketTool
 
@@ -34,6 +33,14 @@ if __name__ == '__main__':
     cp.tools.websocket = WebSocketTool()
 
     root = Root('127.0.0.1', 9000, False)
+    myip = socket.gethostbyname(socket.gethostname())
+    clientfile = os.path.join(rootdir, 'js/client.js')
+    for line in fip.input(clientfile, inplace=1):
+        if "ws://" in line:
+            sys.stdout.write(re.sub('\d+\.\d+\.\d+\.\d+', myip, line))
+        else:
+            sys.stdout.write(line)
+
     cp.Application.root = root
     cp.quickstart(root, '', config={
         '/ws': {

@@ -20,8 +20,9 @@ class DnDSocket(WebSocket):
         if not message.is_binary:
             try:
                 eval("self."+str(message.data))
-            except AttributeError:
+            except AttributeError as e:
                 print "Couldn't run: %s" % message.data
+                print e
 
     def get_state(self):
         greet ="Sending state\n"
@@ -81,8 +82,10 @@ class DnDSocket(WebSocket):
                 {'result': result, 'query': rollstr,
                  'name': self.users[self.m_uid]})
 
-    def update_storeable(self, id, key, value):
-        pass
+    def update_storeable(self, id, data):
+        id = int(id)
+        data = loads(data)
+        self.storables[id] = dict(self.storables[id].items() + data.items())
 
     def add_storeable(self, templatename, data):
         id = self.next_storid['next']
@@ -91,6 +94,13 @@ class DnDSocket(WebSocket):
         self.next_storid['next'] += 1
         self.storables[id] = storeme
         print "New storeable type:%s data:%s" % (templatename, data)
+        self.render_storeable(id)
+
+    def render_storeable(self, id):
+        id = int(id)
+        output = self.storables[id].render()
+        print output
+        self.send_message("showstoreable", output)
 
     def ekko(self, msg):
         self.send_message('echo', msg)

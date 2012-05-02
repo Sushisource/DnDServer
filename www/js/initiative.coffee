@@ -46,9 +46,9 @@ sort_initlist = ->
   listitems.sort (ia, ib) ->
     a = parseInt $j($j(ia).find('.badge')[0]).html()
     b = parseInt $j($j(ib).find('.badge')[0]).html()
-    if a > b
+    if a < b
       return 1
-    else if a < b
+    else if a > b
       return -1
     else
       return 0

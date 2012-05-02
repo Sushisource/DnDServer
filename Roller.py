@@ -19,4 +19,4 @@ def rollDice(dieReq):
         result = eval(re.sub('(\d+d\d+)', subDice, dieReq))
     except Exception:
         pass
-    return "%s for %s" % (dieReq, result)
+    return result

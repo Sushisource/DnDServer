@@ -1,0 +1,2 @@
+Rolls ${query}:</br>
+ ${total}

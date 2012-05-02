@@ -17,6 +17,6 @@ $j ->
     return false
 
 diceroll = (result) ->
-  $j.dnd.post_to_chat(result.name, "Rolls #{result.result}")
+  $j.dnd.post_to_chat(result.name, result.result)
 
 $j.dnd.callbacks['diceroll'] = diceroll

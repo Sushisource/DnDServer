@@ -1,4 +1,5 @@
 from ws4py.websocket import WebSocket
+from Storable import Storable
 from ws4py.messaging import TextMessage
 from json import dumps
 import cherrypy as cp
@@ -6,9 +7,11 @@ from Roller import rollDice
 
 class DnDSocket(WebSocket):
     ilist_chars = {}
+    next_i_id = {'next': 0}
     users = {}
     next_uid = {'next': 0}
-    next_i_id = {'next': 0}
+    storables = {}
+    next_storid = {'next': 0}
     m_uid = None
 
     def received_message(self, message):
@@ -30,14 +33,14 @@ class DnDSocket(WebSocket):
                 self.send_message('ouser_response', {'name': uname, 'id': id}, True)
         self.send_message('chat',
                 {'name': "Chief Ripnugget",
-                 'msg': "Welcome to DnD Server %s!" % uname})
+                 'msg': "Welcome to DnD Server %s!" % self.users[self.m_uid]})
 
     def add_char(self, charname, initiative):
         if charname in self.ilist_chars:
             self.ilist_chars[charname].initiative = initiative
             self.send_message('updatechar', self.ilist_chars[charname].to_dict())
             return
-        char = Character(charname, self.next_i_id['next'])
+        char = InitlistObject(charname, self.next_i_id['next'])
         self.next_i_id['next'] += 1
         char.initiative = initiative
         self.ilist_chars[charname] = char
@@ -71,8 +74,21 @@ class DnDSocket(WebSocket):
 
     def dicebox(self, rollstr):
         result = rollDice(rollstr)
+        tlok = cp.Application.root.tlok
+        result = tlok.get_template('diceresult.mako').render(query=rollstr,
+            total=result)
         self.send_message("diceroll",
-                {'result': result, 'name': self.users[self.m_uid]})
+                {'result': result, 'query': rollstr,
+                 'name': self.users[self.m_uid]})
+
+    def store_storeable_item(self, id, key, value):
+        pass
+
+    def add_storeable(self, templatename, data):
+        id = self.next_storid['next']
+        storeme = Storable(templatename,id,data)
+        self.next_storid['next'] += 1
+
 
     def ekko(self, msg):
         self.send_message('echo', msg)
@@ -88,7 +104,7 @@ class DnDSocket(WebSocket):
             print "Orphaned client refresh"
 
 
-class Character:
+class InitlistObject:
     def __init__(self, name, id):
         self.name = name
         self.initiative = 0

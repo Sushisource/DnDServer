@@ -1,30 +1,25 @@
 $j = jQuery
 
 initadd = $j '#init_add'
-addmodal = $j '#addchar'
-addchar = $j '#addchar_add'
-addchar_form = $j '#addchar_form'
-charname_input = $j '#charname'
+addmodal = $j '#addinit_item'
+addchar = $j '#addinit_add'
+addchar_form = $j '#addinit_form'
+charname_input = $j '#initname'
 initiative_input = $j '#initiative'
 initiativelist = $j '#initiativelist'
 well = $j '#initlistwell'
 
 $j ->
   well.show()
+  addmodal.on 'shown', ->
+    charname_input.focus().select()
 
   initadd.click ->
     charname_input.val ""
     initiative_input.val ""
-    addmodal.on 'shown', ->
-      charname_input.focus().select()
     addmodal.modal('toggle')
 
-  addmodal.modal({
-    keyboard: false
-    show: false
-  })
-
-  $j('#addchar input').bind 'keypress', (e) ->
+  $j('#initname, #initiative').bind 'keypress', (e) ->
     if ((e.keyCode || e.which) == 13)
       addchar_form.submit()
 
@@ -37,7 +32,7 @@ $j ->
     if isNaN(initv) or initv is null or initv is ""
       alert("Initiative must be a number")
       return false
-    window.ws.send "add_char('#{name}',#{initv})"
+    window.ws.send "add_inititem('#{name}',#{initv})"
     addmodal.modal('toggle')
     return false
 
@@ -66,7 +61,7 @@ add_char = (char) ->
   initiativelist.append(item).children(':last').fadeIn(200)
   #Add function handles to buttons / badge
   $j("#init_del_#{char.id}").click ->
-    window.ws.send "del_char('#{char.name}')"
+    window.ws.send "del_inititem('#{char.name}')"
   $j("#init_#{char.id}").click ->
     change_init char
   sort_initlist()

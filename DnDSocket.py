@@ -1,7 +1,7 @@
 from ws4py.websocket import WebSocket
 from Storable import Storable
 from ws4py.messaging import TextMessage
-from json import dumps
+from json import dumps, loads
 import cherrypy as cp
 from Roller import rollDice
 
@@ -16,7 +16,7 @@ class DnDSocket(WebSocket):
 
     def received_message(self, message):
         if self.m_uid is not None:
-            print "%s runs %s" % (self.users[self.m_uid], message.data)
+            print "%s runs %s" % (self.users[self.m_uid], str(message.data))
         if not message.is_binary:
             try:
                 eval("self."+str(message.data))
@@ -35,7 +35,7 @@ class DnDSocket(WebSocket):
                 {'name': "Chief Ripnugget",
                  'msg': "Welcome to DnD Server %s!" % self.users[self.m_uid]})
 
-    def add_char(self, charname, initiative):
+    def add_inititem(self, charname, initiative):
         if charname in self.ilist_chars:
             self.ilist_chars[charname].initiative = initiative
             self.send_message('updatechar', self.ilist_chars[charname].to_dict())
@@ -46,7 +46,7 @@ class DnDSocket(WebSocket):
         self.ilist_chars[charname] = char
         self.send_message('addchar', char.to_dict())
 
-    def del_char(self, charname):
+    def del_inititem(self, charname):
         self.send_message('delchar', self.ilist_chars[charname].to_dict())
         del self.ilist_chars[charname]
 
@@ -81,14 +81,16 @@ class DnDSocket(WebSocket):
                 {'result': result, 'query': rollstr,
                  'name': self.users[self.m_uid]})
 
-    def store_storeable_item(self, id, key, value):
+    def update_storeable(self, id, key, value):
         pass
 
     def add_storeable(self, templatename, data):
         id = self.next_storid['next']
+        data = loads(data)
         storeme = Storable(templatename,id,data)
         self.next_storid['next'] += 1
-
+        self.storables[id] = storeme
+        print "New storeable type:%s data:%s" % (templatename, data)
 
     def ekko(self, msg):
         self.send_message('echo', msg)

@@ -32,6 +32,10 @@ class DnDSocket(WebSocket):
         for id, uname in self.users.items():
             if id is not self.m_uid:
                 self.send_message('ouser_response', {'name': uname, 'id': id}, True)
+        #Send the storeables
+        for id in self.storables.keys():
+            self.render_storeable(id, True)
+        #Welcome mat
         self.send_message('chat',
                 {'name': "Chief Ripnugget",
                  'msg': "Welcome to DnD Server %s!" % self.users[self.m_uid]})
@@ -94,13 +98,13 @@ class DnDSocket(WebSocket):
         self.next_storid['next'] += 1
         self.storables[id] = storeme
         print "New storeable type:%s data:%s" % (templatename, data)
-        self.render_storeable(id)
+        self.render_storeable(id, False)
 
-    def render_storeable(self, id):
+    def render_storeable(self, id, solo):
         id = int(id)
         output = self.storables[id].render()
         print output
-        self.send_message("showstoreable", output)
+        self.send_message("showstoreable", output, solo)
 
     def ekko(self, msg):
         self.send_message('echo', msg)

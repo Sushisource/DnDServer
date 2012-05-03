@@ -4,7 +4,7 @@
     <a href="#" id="newchar_btn" class="btn btn-info btn-small hide" >+Char</a>
 </%block>
 <%block name="middle">
-    <div id="boxarena" class="well"></div>
+    <div id="boxarena"></div>
     <%include file="loginbox.html"/>
 </%block>
 <%block name="sidebar">

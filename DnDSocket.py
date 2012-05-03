@@ -103,8 +103,11 @@ class DnDSocket(WebSocket):
     def render_storeable(self, id, solo):
         id = int(id)
         output = self.storables[id].render()
+        callback = self.storables[id].callback
         print output
         self.send_message("showstoreable", output, solo)
+        if callback is not None:
+            self.send_message(callback, id)
 
     def ekko(self, msg):
         self.send_message('echo', msg)

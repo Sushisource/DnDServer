@@ -51,7 +51,7 @@ sort_initlist = ->
     initiativelist.append listitems
 
 add_char = (char) ->
-  item = "<li id='#{char.id}' class='hide initchar'><div class='pull-right' style='margin-top:5px;'>"
+  item = "<li id='init_i_#{char.id}' class='hide initchar'><div class='pull-right' style='margin-top:5px;'>"
   item += "<a class='badge badge-inverse' id='init_#{char.id}'>#{char.init}</a>"
   item += """<a id='init_del_#{char.id}' class='btn' href=#
                   style='padding:2px; height:15px; width:15px; margin:0 5px;'>
@@ -71,8 +71,8 @@ upd_char = (char) ->
   sort_initlist()
 
 del_char = (char) ->
-  $j("##{char.id}").fadeOut ->
-    $j("##{char.id}").remove()
+  $j("#init_i_#{char.id}").fadeOut ->
+    $j("#init_i_#{char.id}").remove()
 
 change_init = (char) ->
   charname_input.val char.name

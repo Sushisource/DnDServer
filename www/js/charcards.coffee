@@ -6,11 +6,20 @@ modal = $j '#addchar_modal'
 charname = $j '#addchar_m_name'
 hp = $j '#addchar_m_hp'
 
+atkmodal = $j '#addatk_modal'
+atkform = $j '#addatk_m_form'
+atkname = $j '#addatk_m_name'
+atkcmd = $j '#addatk_m_cmd'
+atkbtn = $j '#addatk_m_btn'
+atkid = $j '#addatk_m_id'
+
 $j ->
   newcharbtn.show()
 
   modal.on 'shown', ->
     charname.focus().select()
+  atkmodal.on 'shown', ->
+    atkname.focus().select()
 
   newcharbtn.click ->
     charname.val ""
@@ -24,6 +33,10 @@ $j ->
     data = JSON.stringify(data)
     window.ws.send("add_storeable('#{template}','#{data}')")
     modal.modal('toggle')
+    return false
+
+  atkform.submit ->
+    data = {}
     return false
 
 updatehp = (pass, text, orig) ->
@@ -42,5 +55,11 @@ setupchar = (id) ->
     element_id: id,
     bg_over: '#3A87AD',
     bg_out: hp.css('background-color')})
+
+  $j("#char_addatk_#{id}").click ->
+    atkname.val ""
+    atkcmd.val ""
+    atkid.html id
+    atkmodal.modal('toggle')
 
 $j.dnd.callbacks['setup_char'] = setupchar

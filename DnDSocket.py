@@ -86,10 +86,11 @@ class DnDSocket(WebSocket):
                 {'result': result,
                  'name': self.users[self.m_uid]})
 
-    def update_storeable(self, id, data):
+    def update_storeable(self, id, data, subdict='root'):
         id = int(id)
         data = loads(data)
-        self.storables[id].data = dict(self.storables[id].data.items() + data.items())
+        updated = dict(self.storables[id].data[subdict].items() + data.items())
+        self.storables[id].data[subdict] = updated
         self.re_render_storeable(id)
 
     def add_storeable(self, templatename, data):

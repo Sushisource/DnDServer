@@ -26,8 +26,11 @@ $j ->
     modal.modal('toggle')
     return false
 
-updatehp = (pass, text) ->
-  alert(text + " - " + $j(this).attr('idnum'))
+updatehp = (pass, text, orig) ->
+  id = $j(this).attr('idnum')
+  data = {'hp': text }
+  data = JSON.stringify(data)
+  window.ws.send("update_storeable('#{id}','#{data}')")
   return text
 
 setupchar = (id) ->

@@ -16,6 +16,8 @@ $j ->
     window.ws.send "add_user('#{name}')"
     return false
 
+  loginput.select().focus()
+
 
 usr_response = (msg) ->
   $j.dnd.username = msg.name

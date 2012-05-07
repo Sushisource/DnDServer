@@ -6,6 +6,8 @@ $j.dnd.post_to_chat = (user, message) ->
   labl = 'label-success'
   if user == $j.dnd.username
     labl ='label-info'
+  else if user == 'Chief Ripnugget'
+    labl = 'label-warning'
   output = """<div class='chatitem row-fluid'><span class='username span1 label #{labl}'>
   #{user}</span><span class='chatmsg offset1 span11 label label-inverse'>#{message}</span></div>"""
   chatbox.prepend(output)

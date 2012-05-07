@@ -83,13 +83,14 @@ class DnDSocket(WebSocket):
         result = tlok.get_template('diceresult.mako').render(query=rollstr,
             total=result)
         self.send_message("diceroll",
-                {'result': result, 'query': rollstr,
+                {'result': result,
                  'name': self.users[self.m_uid]})
 
     def update_storeable(self, id, data):
         id = int(id)
         data = loads(data)
-        self.storables[id] = dict(self.storables[id].items() + data.items())
+        self.storables[id].data = dict(self.storables[id].data.items() + data.items())
+        self.re_render_storeable(id)
 
     def add_storeable(self, templatename, data):
         id = self.next_storid['next']
@@ -104,8 +105,15 @@ class DnDSocket(WebSocket):
         id = int(id)
         output = self.storables[id].render()
         callback = self.storables[id].callback
-        print output
-        self.send_message("showstoreable", output, solo)
+        self.send_message("showstoreable", {'output': output, 'id': id}, solo)
+        if callback is not None:
+            self.send_message(callback, id)
+
+    def re_render_storeable(self, id, solo=False):
+        id = int(id)
+        output = self.storables[id].render()
+        callback = self.storables[id].callback
+        self.send_message("updatestoreable", {'output': output, 'id': id}, solo)
         if callback is not None:
             self.send_message(callback, id)
 

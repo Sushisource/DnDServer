@@ -2,6 +2,7 @@ from DnDSocket import DnDSocket
 import os, fileinput as fip, re, socket, sys
 import cherrypy as cp
 from ws4py.server.cherrypyserver import WebSocketPlugin, WebSocketTool
+import Spark
 
 from mako.lookup import TemplateLookup
 
@@ -23,10 +24,17 @@ class Root(object):
     def ws(self):
         cp.log("Handler created: %s" % repr(cp.request.ws_handler))
 
+    @cp.expose
+    def dicehisto(self, list, **args):
+        cp.response.headers['Content-Type'] = 'image/png'
+        list = [int(x) for x in list.split(',')]
+        return Spark.plot_sparkline_discrete(list,args,True)
+
+
 if __name__ == '__main__':
     cp.config.update({'server.socket_host': '0.0.0.0',
                       'server.socket_port': 9000,
-                      'autoreload.on': False,
+                      'engine.autoreload_on': False,
                       'tools.staticdir.root': rootdir})
 
     WebSocketPlugin(cp.engine).subscribe()

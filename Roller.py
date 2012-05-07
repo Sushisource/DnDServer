@@ -1,22 +1,32 @@
 import random
-import numpy as np
 import re
+from Spark import plot_sparkline_discrete
 __author__ = 'Spencer Judge'
 
-def subDice(diestr):
-    (numdice, sides) = diestr.group(0).split('d')
+def doRolls(numdice, sides):
     numdice = int(numdice)
     sides = int(sides)
-    rolls = np.arange(numdice)
+    rolls = []
     for i in range(numdice):
-        rolls[i]=random.randint(1,sides)
-    summ = np.sum(rolls)
-    return str(summ)
+        rolls.append(random.randint(1,sides))
+    return rolls
 
 def rollDice(dieReq):
     result = "err"
+    additional = [""]
+
+    def diceSub(diestr):
+        (numdice, sides) = diestr.group(0).split('d')
+        rolls = doRolls(numdice, sides)
+        summ = sum(rolls)
+        if 3<int(numdice)<200:
+            rolls = ','.join(map(str, rolls)) #Make rolls into comma list
+            additional[0] += "<img src='dicehisto?list=%s&width=10&" \
+            "height=50&limits=0,%s&upper=%s'>" \
+        % (rolls,sides,sides)
+        return str(summ)
     try:
-        result = eval(re.sub('(\d+d\d+)', subDice, dieReq))
-    except Exception:
-        pass
-    return result
+        result = str(eval(re.sub('(\d+d\d+)', diceSub, dieReq)))
+    except Exception as e:
+        print e
+    return "<h4>" + result + "</h4>" + additional[0]

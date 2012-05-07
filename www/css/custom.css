@@ -15,9 +15,16 @@
     white-space: normal;
 }
 
+.chatmsg h4 {
+    margin: 2px;
+    padding: 0;
+    font-weight: bold;
+    color: #e6db74;
+}
+
 .chatbox {
     padding: 2px;
-    overflow-y: overlay;
+    overflow-y: scroll;
     margin-bottom: 0;
 }
 

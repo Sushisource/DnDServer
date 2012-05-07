@@ -4,7 +4,7 @@ newcharform = $j '#addchar_m_form'
 newcharbtn = $j '#newchar_btn'
 modal = $j '#addchar_modal'
 charname = $j '#addchar_m_name'
-hp = $j '#addchar_m_hp'
+hpin = $j '#addchar_m_hp'
 
 atkmodal = $j '#addatk_modal'
 atkform = $j '#addatk_m_form'
@@ -27,7 +27,7 @@ $j ->
 
   newcharform.submit ->
     data = {'name': charname.val(),
-    'hp': hp.val(),
+    'hp': hpin.val(),
     'callback': 'setup_char'}
     template = "storeable_character.mako"
     data = JSON.stringify(data)
@@ -36,7 +36,12 @@ $j ->
     return false
 
   atkform.submit ->
+    name = atkname.val()
     data = {}
+    data[name] = atkcmd.val()
+    data = JSON.stringify(data)
+    window.ws.send("update_storeable('#{atkid.html()}','#{data}','attack')")
+    atkmodal.modal('toggle')
     return false
 
 updatehp = (pass, text, orig) ->
@@ -51,6 +56,7 @@ setupchar = (id) ->
   hp.attr('idnum', id)
 
   $j("#char_hp_#{id}").editInPlace({
+    default_text: hp.html()
     callback: updatehp,
     element_id: id,
     bg_over: '#3A87AD',

@@ -10,7 +10,7 @@ class DnDSocket(WebSocket):
     next_i_id = {'next': 0}
     users = {}
     next_uid = {'next': 0}
-    storables = {}
+    storeables = {}
     next_storid = {'next': 0}
     m_uid = None
 
@@ -33,7 +33,7 @@ class DnDSocket(WebSocket):
             if id is not self.m_uid:
                 self.send_message('ouser_response', {'name': uname, 'id': id}, True)
         #Send the storeables
-        for id in self.storables.keys():
+        for id in self.storeables.keys():
             self.render_storeable(id, True)
         #Welcome mat
         self.send_message('chat',
@@ -88,9 +88,11 @@ class DnDSocket(WebSocket):
 
     def update_storeable(self, id, data, subdict='root'):
         id = int(id)
+        if subdict not in self.storeables[id].data:
+            self.storeables[id].data[subdict] = {}
         data = loads(data)
-        updated = dict(self.storables[id].data[subdict].items() + data.items())
-        self.storables[id].data[subdict] = updated
+        updated = dict(self.storeables[id].data[subdict].items() + data.items())
+        self.storeables[id].data[subdict] = updated
         self.re_render_storeable(id)
 
     def add_storeable(self, templatename, data):
@@ -98,22 +100,22 @@ class DnDSocket(WebSocket):
         data = loads(data)
         storeme = Storable(templatename,id,data)
         self.next_storid['next'] += 1
-        self.storables[id] = storeme
+        self.storeables[id] = storeme
         print "New storeable type:%s data:%s" % (templatename, data)
         self.render_storeable(id, False)
 
     def render_storeable(self, id, solo):
         id = int(id)
-        output = self.storables[id].render()
-        callback = self.storables[id].callback
+        output = self.storeables[id].render()
+        callback = self.storeables[id].callback
         self.send_message("showstoreable", {'output': output, 'id': id}, solo)
         if callback is not None:
             self.send_message(callback, id)
 
     def re_render_storeable(self, id, solo=False):
         id = int(id)
-        output = self.storables[id].render()
-        callback = self.storables[id].callback
+        output = self.storeables[id].render()
+        callback = self.storeables[id].callback
         self.send_message("updatestoreable", {'output': output, 'id': id}, solo)
         if callback is not None:
             self.send_message(callback, id)

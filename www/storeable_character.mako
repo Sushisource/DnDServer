@@ -4,9 +4,13 @@
     <br/>
     % if 'attack' in data:
     <h3>Attacks:</h3>
-        % for name, command in data['attack'].items():
-                <div>${name} ${command}</div>
-        % endfor
+    % for name, command in data['attack'].items():
+            <div class="clickrow"
+                 onclick="javascript:jQuery.dnd.doAttack('${name}','${command}','${root['name']}')">
+                <b>${name}:</b> <i>${command}</i>
+                <a href="javascript:jQuery.dnd.editAttack(${id},'${name}','${command}')"
+                   class="icon-edit pull-right"></a></div>
+    % endfor
     % endif
     <button class="btn btn-mini btn-info pull-right" id="char_addatk_${id}">+atk</button>
 </div>

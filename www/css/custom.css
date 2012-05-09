@@ -41,6 +41,12 @@
     display: inline-block;
 }
 
+.storeable h3 {
+    font-size: 14px;
+    padding: 0;
+    border-bottom: 1px solid #d3d3d3;
+}
+
 .storeable input {
     background-color: transparent;
     border: none;
@@ -57,4 +63,14 @@
     transition: none;
     display:inline;
     width: auto;
+}
+
+.clickrow {
+    background: rgba(255,255,255,.8);
+    margin: 5px 0;
+    padding: 2px;
+}
+
+.clickrow:hover {
+    background: rgba(0,163,254,.3)
 }

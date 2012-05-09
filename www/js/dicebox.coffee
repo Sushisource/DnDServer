@@ -19,4 +19,8 @@ $j ->
 diceroll = (result) ->
   $j.dnd.post_to_chat(result.name, result.result)
 
+$j.dnd.diceroll = (roll) ->
+  diceinput.val roll
+  dicebtn.click()
+
 $j.dnd.callbacks['diceroll'] = diceroll

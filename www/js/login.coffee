@@ -39,7 +39,7 @@ otheruser_response = (msg) ->
 deluser = (id) ->
   $j("#ouser_label_#{id}").remove()
 
-loginput.select().focus()
+loginput.focus().select()
 $j.dnd.callbacks['user_response'] = usr_response
 $j.dnd.callbacks['deluser'] = deluser
 

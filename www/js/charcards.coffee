@@ -19,7 +19,10 @@ $j ->
   modal.on 'shown', ->
     charname.focus().select()
   atkmodal.on 'shown', ->
-    atkname.focus().select()
+    if atkname.val() == ""
+      atkname.focus().select()
+    else
+      atkcmd.focus().select()
 
   newcharbtn.click ->
     charname.val ""
@@ -38,7 +41,7 @@ $j ->
   atkform.submit ->
     name = atkname.val()
     data = {}
-    data[name] = atkcmd.val()
+    data[name] = atkcmd.val().trim()
     data = JSON.stringify(data)
     window.ws.send("update_storeable('#{atkid.html()}','#{data}','attack')")
     atkmodal.modal('toggle')
@@ -67,5 +70,15 @@ setupchar = (id) ->
     atkcmd.val ""
     atkid.html id
     atkmodal.modal('toggle')
+
+$j.dnd.editAttack = (id, name, cmd) ->
+  atkname.val name
+  atkcmd.val cmd
+  atkid.html id
+  atkmodal.modal 'toggle'
+
+$j.dnd.doAttack = (name,cmd,wielder) ->
+  $j.dnd.post_to_chat(wielder, "I'm attacking with #{name}!")
+  $j.dnd.diceroll(cmd)
 
 $j.dnd.callbacks['setup_char'] = setupchar

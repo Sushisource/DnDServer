@@ -32,7 +32,7 @@ $j ->
     if isNaN(initv) or initv is null or initv is ""
       alert("Initiative must be a number")
       return false
-    window.ws.send "add_inititem('#{name}',#{initv})"
+    $j.dnd.send "add_inititem", {name: name, initiative: initv}
     addmodal.modal('toggle')
     return false
 
@@ -61,7 +61,7 @@ add_char = (char) ->
   initiativelist.append(item).children(':last').fadeIn(200)
   #Add function handles to buttons / badge
   $j("#init_del_#{char.id}").click ->
-    window.ws.send "del_inititem('#{char.name}')"
+    $j.dnd.send "del_inititem", {name: char.name}
   $j("#init_#{char.id}").click ->
     change_init char
   sort_initlist()

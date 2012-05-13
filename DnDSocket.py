@@ -2,7 +2,7 @@ from ws4py.websocket import WebSocket
 from Storable import Storable
 from ws4py.messaging import TextMessage
 from json import dumps, loads
-import cherrypy as cp
+import cherrypy as cp, types
 from Roller import rollDice
 
 class DnDSocket(WebSocket):
@@ -15,35 +15,43 @@ class DnDSocket(WebSocket):
     m_uid = None
 
     def received_message(self, message):
-        if self.m_uid is not None:
-            print "%s runs %s" % (self.users[self.m_uid], str(message.data))
         if not message.is_binary:
             try:
-                eval("self."+str(message.data))
-            except AttributeError as e:
+                msg = loads(str(message))
+                for func in cp.Application.root.dndfuncs:
+                    if msg['fn'] == func[0]:
+                        #Extra dark magicks:
+                        boundf = types.MethodType(func[1], self, DnDSocket)
+                        boundf(msg['data'])
+                        print "%s runs %s" % (self.users[self.m_uid], msg['fn'])
+            except Exception as err:
                 print "Couldn't run: %s" % message.data
-                print e
+                print err
 
-    def get_state(self):
-        greet ="Sending state\n"
+    def get_state(self, data):
+        greet = "Sending state\n"
         self.send_message("echo", greet, True)
-        self.send_initlist()
+        self.send_initlist(None)
         #Send the userlist
-        for id, uname in self.users.items():
-            if id is not self.m_uid:
-                self.send_message('ouser_response', {'name': uname, 'id': id}, True)
+        for uid, uname in self.users.items():
+            if uid is not self.m_uid:
+                self.send_message('ouser_response',
+                        {'name': uname, 'id': uid}, True)
         #Send the storeables
-        for id in self.storeables.keys():
-            self.render_storeable(id, True)
+        for uid in self.storeables.keys():
+            self.render_storeable(uid, True)
         #Welcome mat
         self.send_message('chat',
                 {'name': "Chief Ripnugget",
                  'msg': "Welcome to DnD Server %s!" % self.users[self.m_uid]})
 
-    def add_inititem(self, charname, initiative):
+    def add_inititem(self, data):
+        charname = data['name']
+        initiative = data['initiative']
         if charname in self.ilist_chars:
             self.ilist_chars[charname].initiative = initiative
-            self.send_message('updatechar', self.ilist_chars[charname].to_dict())
+            self.send_message('updatechar',
+                self.ilist_chars[charname].to_dict())
             return
         char = InitlistObject(charname, self.next_i_id['next'])
         self.next_i_id['next'] += 1
@@ -51,25 +59,27 @@ class DnDSocket(WebSocket):
         self.ilist_chars[charname] = char
         self.send_message('addchar', char.to_dict())
 
-    def del_inititem(self, charname):
+    def del_inititem(self, data):
+        charname = data['name']
         self.send_message('delchar', self.ilist_chars[charname].to_dict())
         del self.ilist_chars[charname]
 
-    def send_initlist(self):
+    def send_initlist(self, data):
         initlist = {}
         for char in self.ilist_chars.values():
             initlist[char.name] = char.to_dict()
         self.send_message('initlist', initlist, True)
 
     def send_message(self, protocol, data, private=False):
-        m = dumps((protocol, data))
+        sendme = dumps((protocol, data))
         if not private:
-            cp.engine.publish('websocket-broadcast', TextMessage(m))
+            cp.engine.publish('websocket-broadcast', TextMessage(sendme))
         else:
-            self.send(m,False)
+            self.send(sendme, False)
 
-    def add_user(self, uname):
+    def add_user(self, data):
         uid = self.next_uid['next']
+        uname = data['name']
         self.users[uid] = uname
         self.m_uid = uid
         self.next_uid['next'] += 1
@@ -77,7 +87,13 @@ class DnDSocket(WebSocket):
         self.send_message('user_response', {'name': uname, 'id': uid}, True)
         self.send_message('ouser_response', {'name': uname, 'id': uid})
 
-    def dicebox(self, rollstr):
+    def userchat(self, message):
+        uname = self.users[self.m_uid]
+        msg = {'name': uname, 'msg': message['msg']}
+        self.send_message('chat', msg)
+
+    def dicebox(self, data):
+        rollstr = data['rollstr']
         result = rollDice(rollstr)
         tlok = cp.Application.root.tlok
         result = tlok.get_template('diceresult.mako').render(query=rollstr,
@@ -86,39 +102,41 @@ class DnDSocket(WebSocket):
                 {'result': result,
                  'name': self.users[self.m_uid]})
 
-    def update_storeable(self, id, data, subdict='root'):
-        id = int(id)
-        if subdict not in self.storeables[id].data:
-            self.storeables[id].data[subdict] = {}
-        data = loads(data)
-        updated = dict(self.storeables[id].data[subdict].items() + data.items())
-        self.storeables[id].data[subdict] = updated
-        self.re_render_storeable(id)
+    def update_storeable(self, data):
+        store_id = int(data['id'])
+        subdict = data['subdict_name']
+        if subdict not in self.storeables[store_id].data:
+            self.storeables[store_id].data[subdict] = {}
+        updated = dict(self.storeables[store_id].data[subdict].items() + data['subdict'].items())
+        self.storeables[store_id].data[subdict] = updated
+        self.re_render_storeable(store_id)
 
-    def add_storeable(self, templatename, data):
-        id = self.next_storid['next']
-        data = loads(data)
-        storeme = Storable(templatename,id,data)
+    def add_storeable(self, data):
+        store_id = self.next_storid['next']
+        templatename = data['template']
+        storeme = Storable(templatename, store_id, data)
         self.next_storid['next'] += 1
-        self.storeables[id] = storeme
+        self.storeables[store_id] = storeme
         print "New storeable type:%s data:%s" % (templatename, data)
-        self.render_storeable(id, False)
+        self.render_storeable(store_id, False)
 
-    def render_storeable(self, id, solo):
-        id = int(id)
-        output = self.storeables[id].render()
-        callback = self.storeables[id].callback
-        self.send_message("showstoreable", {'output': output, 'id': id}, solo)
+    def render_storeable(self, store_id, solo):
+        store_id = int(store_id)
+        output = self.storeables[store_id].render()
+        callback = self.storeables[store_id].callback
+        self.send_message("showstoreable",
+                {'output': output, 'id': store_id}, solo)
         if callback is not None:
-            self.send_message(callback, id)
+            self.send_message(callback, store_id)
 
-    def re_render_storeable(self, id, solo=False):
-        id = int(id)
-        output = self.storeables[id].render()
-        callback = self.storeables[id].callback
-        self.send_message("updatestoreable", {'output': output, 'id': id}, solo)
+    def re_render_storeable(self, store_id, solo=False):
+        store_id = int(store_id)
+        output = self.storeables[store_id].render()
+        callback = self.storeables[store_id].callback
+        self.send_message("updatestoreable",
+                {'output': output, 'id': store_id}, solo)
         if callback is not None:
-            self.send_message(callback, id)
+            self.send_message(callback, store_id)
 
     def ekko(self, msg):
         self.send_message('echo', msg)
@@ -135,10 +153,10 @@ class DnDSocket(WebSocket):
 
 
 class InitlistObject:
-    def __init__(self, name, id):
+    def __init__(self, name, m_id):
         self.name = name
         self.initiative = 0
-        self.id = id
+        self.id = m_id
 
     def to_dict(self):
         ret = {'name': self.name, 'init': self.initiative, 'id': self.id}

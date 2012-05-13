@@ -12,8 +12,7 @@ $j ->
 
   dicebox.submit ->
     instr = diceinput.val().trim()
-    return if not $j.dnd.validate(instr)
-    window.ws.send "dicebox('#{instr}')"
+    $j.dnd.send "dicebox", {rollstr: instr}
     return false
 
 diceroll = (result) ->

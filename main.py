@@ -1,5 +1,5 @@
 from DnDSocket import DnDSocket
-import os, fileinput as fip, re, socket, sys
+import os, sys, inspect
 import cherrypy as cp
 from ws4py.server.cherrypyserver import WebSocketPlugin, WebSocketTool
 import Spark
@@ -15,6 +15,8 @@ class Root(object):
         self.tlok = TemplateLookup(directories=rootdir,
             output_encoding='utf-8',
             input_encoding='utf-8')
+        #Dark magicks:
+        self.dndfuncs = [x for x in inspect.getmembers(DnDSocket) if inspect.ismethod(x[1])]
 
     @cp.expose
     def index(self):
@@ -30,24 +32,17 @@ class Root(object):
         list = [int(x) for x in list.split(',')]
         return Spark.plot_sparkline_discrete(list,args,True)
 
-
 if __name__ == '__main__':
     cp.config.update({'server.socket_host': '0.0.0.0',
                       'server.socket_port': 9000,
                       'engine.autoreload_on': False,
-                      'tools.staticdir.root': rootdir})
+                      'tools.staticdir.root': rootdir,
+                      'log.screen': False})
 
     WebSocketPlugin(cp.engine).subscribe()
     cp.tools.websocket = WebSocketTool()
 
     root = Root('127.0.0.1', 9000, False)
-    myip = socket.gethostbyname(socket.gethostname())
-    clientfile = os.path.join(rootdir, 'js/client.js')
-    for line in fip.input(clientfile, inplace=1):
-        if "ws://" in line:
-            sys.stdout.write(re.sub('\d+\.\d+\.\d+\.\d+', myip, line))
-        else:
-            sys.stdout.write(line)
 
     cp.Application.root = root
     cp.quickstart(root, '', config={

@@ -74,3 +74,8 @@
 .clickrow:hover {
     background: rgba(0,163,254,.3)
 }
+
+.clickrow a {
+    font-size: 14px;
+    font-weight: bold;
+}

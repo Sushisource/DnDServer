@@ -13,7 +13,7 @@ $j ->
   loginbox.submit ->
     name = loginput.val().trim()
     return false if not $j.dnd.validate(name)
-    window.ws.send "add_user('#{name}')"
+    $j.dnd.send "add_user", {name: name}
     return false
 
 usr_response = (msg) ->
@@ -42,4 +42,3 @@ deluser = (id) ->
 loginput.focus().select()
 $j.dnd.callbacks['user_response'] = usr_response
 $j.dnd.callbacks['deluser'] = deluser
-

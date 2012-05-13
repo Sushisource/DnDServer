@@ -30,28 +30,25 @@ $j ->
 
   newcharform.submit ->
     data = {'name': charname.val(),
-    'hp': hpin.val(),
-    'callback': 'setup_char'}
-    template = "storeable_character.mako"
-    data = JSON.stringify(data)
-    window.ws.send("add_storeable('#{template}','#{data}')")
+    hp: hpin.val(),
+    callback: 'setup_char'
+    template: "storeable_character.mako"}
+    $j.dnd.send "add_storeable", data
     modal.modal('toggle')
     return false
 
   atkform.submit ->
     name = atkname.val()
-    data = {}
-    data[name] = atkcmd.val().trim()
-    data = JSON.stringify(data)
-    window.ws.send("update_storeable('#{atkid.html()}','#{data}','attack')")
+    subdict = {}
+    subdict[name] = atkcmd.val().trim()
+    $j.dnd.updatestoreable(atkid.html(), subdict, 'attack')
     atkmodal.modal('toggle')
     return false
 
 updatehp = (pass, text, orig) ->
   id = $j(this).attr('idnum')
-  data = {'hp': text }
-  data = JSON.stringify(data)
-  window.ws.send("update_storeable('#{id}','#{data}')")
+  data = {hp: text}
+  $j.dnd.updatestoreable(id, data)
   return text
 
 setupchar = (id) ->

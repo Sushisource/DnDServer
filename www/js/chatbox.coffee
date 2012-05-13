@@ -1,6 +1,8 @@
 $j = jQuery
 
 chatbox = $j '#chatbox'
+chatinbox = $j '#chat_form'
+chatinput = $j '#chat_in'
 
 $j.dnd.post_to_chat = (user, message) ->
   labl = 'label-success'
@@ -14,15 +16,24 @@ $j.dnd.post_to_chat = (user, message) ->
   if chatbox.children().length > 100
     chatbox.children().last().remove()
 
+$j.dnd.userchat = (msg) ->
+  $j.dnd.send "userchat", {msg: msg}
+
 sizechat = ->
   pos = chatbox.position()
   chatbox.height($j(window).height() - pos.top - 20)
 
 $j ->
   chatbox.show()
+  chatinbox.show()
   $j(window).resize ->
     sizechat()
   sizechat()
+
+  chatinbox.submit ->
+    $j.dnd.userchat(chatinput.val())
+    chatinput.val ""
+    return false
 
 chat = (msg) ->
   $j.dnd.post_to_chat(msg.name, msg.msg)

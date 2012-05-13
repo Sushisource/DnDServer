@@ -18,6 +18,9 @@ $j.dnd.validate = (input) ->
     return false
   return true
 
+$j.dnd.send = (fn, params = {}) ->
+  data = {fn: fn, data: params}
+  window.ws.send(JSON.stringify(data))
 
 init_websocket = ->
   #Setup websockets

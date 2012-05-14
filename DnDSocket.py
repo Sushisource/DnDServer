@@ -8,14 +8,13 @@ from Roller import rollDice
 from Storable import Storable
 
 class DnDSocket(WebSocket):
-    users = {}
-    next_uid = {'next': 0}
     storeables = {}
     next_storid = {'next': 0}
-    m_uid = None
 
     def __init__(self, sock, protocols=None, extensions=None, environ=None):
         super(DnDSocket, self).__init__(sock, protocols, extensions, environ)
+        self.m_uid = None
+        self.uname = "Redshirt"
 
     def received_message(self, message):
         if not message.is_binary:
@@ -26,17 +25,24 @@ class DnDSocket(WebSocket):
                         #Extra dark magicks:
                         boundf = types.MethodType(func[1], self, DnDSocket)
                         boundf(msg['data'])
-                        print "%s runs %s" % (self.users[self.m_uid], msg['fn'])
+                        print "%s runs %s" % (self.uname, msg['fn'])
             except Exception as err:
                 print "Couldn't run: %s" % message.data
                 print err
+
+    def send_message(self, protocol, data, private=False):
+        sendme = dumps((protocol, data))
+        if not private:
+            cp.engine.publish('websocket-broadcast', TextMessage(sendme))
+        else:
+            self.send(sendme, False)
 
     def get_state(self, data):
         greet = "Sending state\n"
         self.send_message("echo", greet, True)
         self.send_initlist(None)
         #Send the userlist
-        for uid, uname in self.users.items():
+        for uid, uname in cpa.root.usermgr.enum_users():
             if uid is not self.m_uid:
                 self.send_message('ouser_response',
                         {'name': uname, 'id': uid}, True)
@@ -46,28 +52,17 @@ class DnDSocket(WebSocket):
         #Welcome mat
         self.send_message('chat',
                 {'name': "Chief Ripnugget",
-                 'msg': "Welcome to DnD Server %s!" % self.users[self.m_uid]})
-
-    def send_message(self, protocol, data, private=False):
-        sendme = dumps((protocol, data))
-        if not private:
-            cp.engine.publish('websocket-broadcast', TextMessage(sendme))
-        else:
-            self.send(sendme, False)
+                 'msg': "Welcome to DnD Server %s!" % self.uname})
 
     def add_user(self, data):
-        uid = self.next_uid['next']
         uname = data['name']
-        self.users[uid] = uname
-        self.m_uid = uid
-        self.next_uid['next'] += 1
-        print "New user %s id: %d" % (uname, uid)
-        self.send_message('user_response', {'name': uname, 'id': uid}, True)
-        self.send_message('ouser_response', {'name': uname, 'id': uid})
+        self.m_uid = cpa.root.usermgr.add_user(uname)
+        self.uname = uname
+        self.send_message('user_response', {'name': uname, 'id': self.m_uid}, True)
+        self.send_message('ouser_response', {'name': uname, 'id': self.m_uid})
 
     def userchat(self, message):
-        uname = self.users[self.m_uid]
-        msg = {'name': uname, 'msg': message['msg']}
+        msg = {'name': self.uname, 'msg': message['msg']}
         self.send_message('chat', msg)
 
     def dicebox(self, data):
@@ -78,7 +73,7 @@ class DnDSocket(WebSocket):
             total=result)
         self.send_message("diceroll",
                 {'result': result,
-                 'name': self.users[self.m_uid]})
+                 'name': self.uname})
 
     def update_storeable(self, data):
         store_id = int(data['id'])
@@ -112,9 +107,8 @@ class DnDSocket(WebSocket):
 
     def closed(self, code, reason=None):
         try:
-            print "Deleted user: " + self.users[self.m_uid]
+            cpa.root.usermgr.del_user(self.m_uid)
             self.send_message('deluser', self.m_uid)
-            del self.users[self.m_uid]
             print "client disconnect"
         except Exception:
             #Phantom client. Better print message

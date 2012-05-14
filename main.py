@@ -1,12 +1,11 @@
-from functools import partial
 from DnDSocket import DnDSocket
 import os, sys, inspect
 import cherrypy as cp
 from ws4py.server.cherrypyserver import WebSocketPlugin, WebSocketTool
 from InitlistManager import InitlistManager
 import Spark
-
 from mako.lookup import TemplateLookup
+from UserManager import UserManager
 
 rootdir = os.path.abspath(os.path.join(os.path.dirname(__file__), 'www'))
 class Root(object):
@@ -23,13 +22,23 @@ class Root(object):
         self.ilm = InitlistManager()
         self.add_mgr_methods_to_socket(self.ilm)
         self.dndfuncs = [x for x in inspect.getmembers(DnDSocket) if inspect.ismethod(x[1])]
+        #Setup any non-injected managers
+        self.usermgr = UserManager()
 
     def add_mgr_methods_to_socket(self, manager):
+        """
+        Darkest magicks method. Takes an object, and adds each of its
+        functions which are not the constructor to the DnDSocket class,
+        wrapping them to call send message on the expansion of each
+        tuple in the return list of messages to send
+        """
         for ilf in inspect.getmembers(manager):
             if inspect.ismethod(ilf[1]) and ilf[0] != "__init__":
                 def usethis(function):
                     def sendwrapper(self, data):
-                        self.send_message(*function(data))
+                        messages = function(data)
+                        for msg in messages:
+                            self.send_message(*msg)
                     return sendwrapper
                 retme = usethis(ilf[1])
                 retme.__name__ = ilf[0]

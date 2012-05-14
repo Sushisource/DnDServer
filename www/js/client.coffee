@@ -38,7 +38,7 @@ init_websocket = ->
     console.log "Lost connection"
     $j(".brand").css('color', 'red')
     #Just refresh
-    location.reload()
+    #location.reload()
   window.ws.onerror = (e) ->
     console.log "Error: " + e.message
 

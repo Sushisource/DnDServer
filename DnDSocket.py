@@ -1,24 +1,27 @@
 from ws4py.websocket import WebSocket
-from Storable import Storable
 from ws4py.messaging import TextMessage
 from json import dumps, loads
-import cherrypy as cp, types
+import types
+import cherrypy as cp
+from cherrypy import Application as cpa
 from Roller import rollDice
+from Storable import Storable
 
 class DnDSocket(WebSocket):
-    ilist_chars = {}
-    next_i_id = {'next': 0}
     users = {}
     next_uid = {'next': 0}
     storeables = {}
     next_storid = {'next': 0}
     m_uid = None
 
+    def __init__(self, sock, protocols=None, extensions=None, environ=None):
+        super(DnDSocket, self).__init__(sock, protocols, extensions, environ)
+
     def received_message(self, message):
         if not message.is_binary:
             try:
                 msg = loads(str(message))
-                for func in cp.Application.root.dndfuncs:
+                for func in cpa.root.dndfuncs:
                     if msg['fn'] == func[0]:
                         #Extra dark magicks:
                         boundf = types.MethodType(func[1], self, DnDSocket)
@@ -45,31 +48,6 @@ class DnDSocket(WebSocket):
                 {'name': "Chief Ripnugget",
                  'msg': "Welcome to DnD Server %s!" % self.users[self.m_uid]})
 
-    def add_inititem(self, data):
-        charname = data['name']
-        initiative = data['initiative']
-        if charname in self.ilist_chars:
-            self.ilist_chars[charname].initiative = initiative
-            self.send_message('updatechar',
-                self.ilist_chars[charname].to_dict())
-            return
-        char = InitlistObject(charname, self.next_i_id['next'])
-        self.next_i_id['next'] += 1
-        char.initiative = initiative
-        self.ilist_chars[charname] = char
-        self.send_message('addchar', char.to_dict())
-
-    def del_inititem(self, data):
-        charname = data['name']
-        self.send_message('delchar', self.ilist_chars[charname].to_dict())
-        del self.ilist_chars[charname]
-
-    def send_initlist(self, data):
-        initlist = {}
-        for char in self.ilist_chars.values():
-            initlist[char.name] = char.to_dict()
-        self.send_message('initlist', initlist, True)
-
     def send_message(self, protocol, data, private=False):
         sendme = dumps((protocol, data))
         if not private:
@@ -95,7 +73,7 @@ class DnDSocket(WebSocket):
     def dicebox(self, data):
         rollstr = data['rollstr']
         result = rollDice(rollstr)
-        tlok = cp.Application.root.tlok
+        tlok = cpa.root.tlok
         result = tlok.get_template('diceresult.mako').render(query=rollstr,
             total=result)
         self.send_message("diceroll",
@@ -109,7 +87,7 @@ class DnDSocket(WebSocket):
             self.storeables[store_id].data[subdict] = {}
         updated = dict(self.storeables[store_id].data[subdict].items() + data['subdict'].items())
         self.storeables[store_id].data[subdict] = updated
-        self.re_render_storeable(store_id)
+        self.render_storeable(store_id, rerender=True)
 
     def add_storeable(self, data):
         store_id = self.next_storid['next']
@@ -120,21 +98,12 @@ class DnDSocket(WebSocket):
         print "New storeable type:%s data:%s" % (templatename, data)
         self.render_storeable(store_id, False)
 
-    def render_storeable(self, store_id, solo):
+    def render_storeable(self, store_id, solo=False, rerender=False):
         store_id = int(store_id)
         output = self.storeables[store_id].render()
         callback = self.storeables[store_id].callback
-        self.send_message("showstoreable",
-                {'output': output, 'id': store_id}, solo)
-        if callback is not None:
-            self.send_message(callback, store_id)
-
-    def re_render_storeable(self, store_id, solo=False):
-        store_id = int(store_id)
-        output = self.storeables[store_id].render()
-        callback = self.storeables[store_id].callback
-        self.send_message("updatestoreable",
-                {'output': output, 'id': store_id}, solo)
+        jsfn = "updatestoreable" if rerender else "showstoreable"
+        self.send_message(jsfn, {'output': output, 'id': store_id}, solo)
         if callback is not None:
             self.send_message(callback, store_id)
 
@@ -150,15 +119,3 @@ class DnDSocket(WebSocket):
         except Exception:
             #Phantom client. Better print message
             print "Orphaned client refresh"
-
-
-class InitlistObject:
-    def __init__(self, name, m_id):
-        self.name = name
-        self.initiative = 0
-        self.id = m_id
-
-    def to_dict(self):
-        ret = {'name': self.name, 'init': self.initiative, 'id': self.id}
-        print ret
-        return ret

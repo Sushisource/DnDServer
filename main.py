@@ -5,6 +5,7 @@ from ws4py.server.cherrypyserver import WebSocketPlugin, WebSocketTool
 from InitlistManager import InitlistManager
 import Spark
 from mako.lookup import TemplateLookup
+from StoreableManager import StoreableManager
 from UserManager import UserManager
 
 rootdir = os.path.abspath(os.path.join(os.path.dirname(__file__), 'www'))
@@ -21,6 +22,8 @@ class Root(object):
         #the darkest of python magicks
         self.ilm = InitlistManager()
         self.add_mgr_methods_to_socket(self.ilm)
+        self.storem = StoreableManager()
+        self.add_mgr_methods_to_socket(self.storem)
         self.dndfuncs = [x for x in inspect.getmembers(DnDSocket) if inspect.ismethod(x[1])]
         #Setup any non-injected managers
         self.usermgr = UserManager()

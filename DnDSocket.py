@@ -5,7 +5,6 @@ import types
 import cherrypy as cp
 from cherrypy import Application as cpa
 from Roller import rollDice
-from Storable import Storable
 
 class DnDSocket(WebSocket):
     storeables = {}
@@ -74,36 +73,6 @@ class DnDSocket(WebSocket):
         self.send_message("diceroll",
                 {'result': result,
                  'name': self.uname})
-
-    def update_storeable(self, data):
-        store_id = int(data['id'])
-        subdict = data['subdict_name']
-        if subdict not in self.storeables[store_id].data:
-            self.storeables[store_id].data[subdict] = {}
-        updated = dict(self.storeables[store_id].data[subdict].items() + data['subdict'].items())
-        self.storeables[store_id].data[subdict] = updated
-        self.render_storeable(store_id, rerender=True)
-
-    def add_storeable(self, data):
-        store_id = self.next_storid['next']
-        templatename = data['template']
-        storeme = Storable(templatename, store_id, data)
-        self.next_storid['next'] += 1
-        self.storeables[store_id] = storeme
-        print "New storeable type:%s data:%s" % (templatename, data)
-        self.render_storeable(store_id, False)
-
-    def render_storeable(self, store_id, solo=False, rerender=False):
-        store_id = int(store_id)
-        output = self.storeables[store_id].render()
-        callback = self.storeables[store_id].callback
-        jsfn = "updatestoreable" if rerender else "showstoreable"
-        self.send_message(jsfn, {'output': output, 'id': store_id}, solo)
-        if callback is not None:
-            self.send_message(callback, store_id)
-
-    def ekko(self, msg):
-        self.send_message('echo', msg)
 
     def closed(self, code, reason=None):
         try:

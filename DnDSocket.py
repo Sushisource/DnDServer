@@ -7,8 +7,6 @@ from cherrypy import Application as cpa
 from Roller import rollDice
 
 class DnDSocket(WebSocket):
-    storeables = {}
-    next_storid = {'next': 0}
 
     def __init__(self, sock, protocols=None, extensions=None, environ=None):
         super(DnDSocket, self).__init__(sock, protocols, extensions, environ)
@@ -39,15 +37,15 @@ class DnDSocket(WebSocket):
     def get_state(self, data):
         greet = "Sending state\n"
         self.send_message("echo", greet, True)
-        self.send_initlist(None)
         #Send the userlist
         for uid, uname in cpa.root.usermgr.enum_users():
             if uid is not self.m_uid:
                 self.send_message('ouser_response',
                         {'name': uname, 'id': uid}, True)
+        #Send initiative list
+        self.send_initlist(None)
         #Send the storeables
-        for uid in self.storeables.keys():
-            self.render_storeable(uid, True)
+        self.send_storeables(None)
         #Welcome mat
         self.send_message('chat',
                 {'name': "Chief Ripnugget",

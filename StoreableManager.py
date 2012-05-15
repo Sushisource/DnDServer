@@ -29,8 +29,13 @@ class StoreableManager:
         output = self.storeables[store_id].render()
         callback = self.storeables[store_id].callback
         jsfn = "updatestoreable" if rerender else "showstoreable"
-        retme = []
-        retme.append((jsfn, {'output': output, 'id': store_id}, solo))
+        retme = [(jsfn, {'output': output, 'id': store_id}, solo)]
         if callback is not None:
             retme.append((callback, store_id))
+        return retme
+
+    def send_storeables(self, data):
+        retme = list()
+        for stid in self.storeables.keys():
+            retme.extend(self.render_storeable(stid, True))
         return retme

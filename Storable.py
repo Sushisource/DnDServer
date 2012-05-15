@@ -14,7 +14,7 @@ class Storable:
         """
         self.m_template_lk = cp.Application.root.tlok
         self.templname = templatename
-        self.data = {}
+        self.data = dict()
         self.data['root'] = data
         self.id = store_id
         if 'callback' in self.data['root']:

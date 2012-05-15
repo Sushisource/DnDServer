@@ -1,6 +1,5 @@
 import random
 import re
-from Spark import plot_sparkline_discrete
 __author__ = 'Spencer Judge'
 
 def doRolls(numdice, sides):

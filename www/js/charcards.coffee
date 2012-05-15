@@ -75,7 +75,7 @@ $j.dnd.editAttack = (id, name, cmd) ->
   atkmodal.modal 'toggle'
 
 $j.dnd.doAttack = (name,cmd,wielder) ->
-  $j.dnd.post_to_chat(wielder, "I'm attacking with #{name}!")
+  $j.dnd.userchat("#{wielder} is attacking with #{name}!")
   $j.dnd.diceroll(cmd)
 
 $j.dnd.callbacks['setup_char'] = setupchar

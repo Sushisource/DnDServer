@@ -1,5 +1,5 @@
 """spark.cgi
-Modified from versoin origionally found on
+Modified from version origionally found on
 http://sparklines.bitworking.info/#source
 
 Removed cgi aspects

@@ -6,12 +6,16 @@ import cherrypy as cp
 from cherrypy import Application as cpa
 from Roller import rollDice
 
+def callable(func):
+    func.is_callable = True
+    return func
+
 class DnDSocket(WebSocket):
 
     def __init__(self, sock, protocols=None, extensions=None, environ=None):
         super(DnDSocket, self).__init__(sock, protocols, extensions, environ)
         self.m_uid = None
-        self.uname = "Redshirt"
+
 
     def received_message(self, message):
         if not message.is_binary:
@@ -29,39 +33,41 @@ class DnDSocket(WebSocket):
 
     def send_message(self, protocol, data, private=False):
         sendme = dumps((protocol, data))
+        #Hack to set username
+        if protocol == "user_response":
+            self.uname = data['name']
         if not private:
             cp.engine.publish('websocket-broadcast', TextMessage(sendme))
         else:
             self.send(sendme, False)
 
+    @callable
     def get_state(self, data):
         greet = "Sending state\n"
         self.send_message("echo", greet, True)
         #Send the userlist
-        for uid, uname in cpa.root.usermgr.enum_users():
-            if uid is not self.m_uid:
-                self.send_message('ouser_response',
-                        {'name': uname, 'id': uid}, True)
+        msgs = cpa.root.usermgr._send_ulist(self.m_uid)
         #Send initiative list
-        self.send_initlist(None)
+        msgs.extend(cpa.root.ilm._send_initlist())
         #Send the storeables
-        self.send_storeables(None)
+        msgs.extend(cpa.root.storem._send_storeables())
         #Welcome mat
-        self.send_message('chat',
-                {'name': "Chief Ripnugget",
-                 'msg': "Welcome to DnD Server %s!" % self.uname})
+        self.serverchat("Welcome to DnD Server %s!" % self.uname)
+        #Send all the messages we've built up
+        for msg in msgs:
+            self.send_message(*msg)
 
-    def add_user(self, data):
-        uname = data['name']
-        self.m_uid = cpa.root.usermgr.add_user(uname)
-        self.uname = uname
-        self.send_message('user_response', {'name': uname, 'id': self.m_uid}, True)
-        self.send_message('ouser_response', {'name': uname, 'id': self.m_uid})
-
+    @callable
     def userchat(self, message):
         msg = {'name': self.uname, 'msg': message['msg']}
         self.send_message('chat', msg)
 
+    def serverchat(self, message):
+        self.send_message('chat',
+                {'name': "Chief Ripnugget",
+                 'msg': message})
+
+    @callable
     def dicebox(self, data):
         rollstr = data['rollstr']
         result = rollDice(rollstr)

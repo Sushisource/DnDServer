@@ -34,7 +34,7 @@ class StoreableManager:
             retme.append((callback, store_id))
         return retme
 
-    def send_storeables(self, data):
+    def _send_storeables(self):
         retme = list()
         for stid in self.storeables.keys():
             retme.extend(self.render_storeable(stid, True))

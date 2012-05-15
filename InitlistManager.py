@@ -22,7 +22,7 @@ class InitlistManager:
          del self.ilist_chars[charname]
          return [('delchar', dict)]
 
-    def send_initlist(self, data):
+    def _send_initlist(self):
          initlist = {}
          for char in self.ilist_chars.values():
              initlist[char.name] = char.to_dict()

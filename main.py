@@ -24,9 +24,10 @@ class Root(object):
         self.add_mgr_methods_to_socket(self.ilm)
         self.storem = StoreableManager()
         self.add_mgr_methods_to_socket(self.storem)
-        self.dndfuncs = [x for x in inspect.getmembers(DnDSocket) if inspect.ismethod(x[1])]
-        #Setup any non-injected managers
         self.usermgr = UserManager()
+        self.add_mgr_methods_to_socket(self.usermgr)
+        self.dndfuncs = [x for x in inspect.getmembers(DnDSocket)
+                         if inspect.ismethod(x[1]) and hasattr(x[1], 'is_callable')]
 
     def add_mgr_methods_to_socket(self, manager):
         """
@@ -34,14 +35,17 @@ class Root(object):
         functions which are not the constructor to the DnDSocket class,
         wrapping them to call send message on the expansion of each
         tuple in the return list of messages to send
+
+        We dont add methods that start with a _ "ie: private methods"
         """
         for ilf in inspect.getmembers(manager):
-            if inspect.ismethod(ilf[1]) and ilf[0] != "__init__":
+            if inspect.ismethod(ilf[1]) and not str.startswith(ilf[0],'_'):
                 def usethis(function):
                     def sendwrapper(self, data):
                         messages = function(data)
                         for msg in messages:
                             self.send_message(*msg)
+                    sendwrapper.is_callable = True
                     return sendwrapper
                 retme = usethis(ilf[1])
                 retme.__name__ = ilf[0]

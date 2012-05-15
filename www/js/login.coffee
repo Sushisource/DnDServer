@@ -12,7 +12,6 @@ $j ->
 
   loginbox.submit ->
     name = loginput.val().trim()
-    return false if not $j.dnd.validate(name)
     $j.dnd.send "add_user", {name: name}
     return false
 

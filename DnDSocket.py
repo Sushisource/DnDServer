@@ -14,32 +14,6 @@ class DnDSocket(WebSocket):
 
     def __init__(self, sock, protocols=None, extensions=None, environ=None):
         super(DnDSocket, self).__init__(sock, protocols, extensions, environ)
-        self.m_uid = None
-
-
-    def received_message(self, message):
-        if not message.is_binary:
-            try:
-                msg = loads(str(message))
-                for func in cpa.root.dndfuncs:
-                    if msg['fn'] == func[0]:
-                        #Extra dark magicks:
-                        boundf = types.MethodType(func[1], self, DnDSocket)
-                        boundf(msg['data'])
-                        print "%s runs %s" % (self.uname, msg['fn'])
-            except Exception as err:
-                print "Couldn't run: %s" % message.data
-                print err
-
-    def send_message(self, protocol, data, private=False):
-        sendme = dumps((protocol, data))
-        #Hack to set username
-        if protocol == "user_response":
-            self.uname = data['name']
-        if not private:
-            cp.engine.publish('websocket-broadcast', TextMessage(sendme))
-        else:
-            self.send(sendme, False)
 
     @callable
     def get_state(self, data):
@@ -62,11 +36,6 @@ class DnDSocket(WebSocket):
         msg = {'name': self.uname, 'msg': message['msg']}
         self.send_message('chat', msg)
 
-    def serverchat(self, message):
-        self.send_message('chat',
-                {'name': "Chief Ripnugget",
-                 'msg': message})
-
     @callable
     def dicebox(self, data):
         rollstr = data['rollstr']
@@ -78,11 +47,42 @@ class DnDSocket(WebSocket):
                 {'result': result,
                  'name': self.uname})
 
+    def received_message(self, message):
+        if not message.is_binary:
+            try:
+                msg = loads(str(message))
+                for func in cpa.root.dndfuncs:
+                    if msg['fn'] == func[0]:
+                        #Extra dark magicks:
+                        boundf = types.MethodType(func[1], self, DnDSocket)
+                        boundf(msg['data'])
+                        print "%s runs %s" % (self.uname, msg['fn'])
+            except Exception as err:
+                print "Couldn't run: %s" % message.data
+                print err
+
+    def send_message(self, protocol, data, private=False):
+        sendme = dumps((protocol, data))
+        #Hack to set user particulars
+        if protocol == "user_response":
+            self.uname = data['name']
+            self.m_uid = data['id']
+        if not private:
+            cp.engine.publish('websocket-broadcast', TextMessage(sendme))
+        else:
+            self.send(sendme, False)
+
+    def serverchat(self, message):
+          self.send_message('chat',
+                  {'name': "Chief Ripnugget",
+                   'msg': message})
+
     def closed(self, code, reason=None):
         try:
-            cpa.root.usermgr.del_user(self.m_uid)
             self.send_message('deluser', self.m_uid)
+            cpa.root.usermgr._del_user(self.m_uid)
             print "client disconnect"
-        except Exception:
+        except Exception as e:
             #Phantom client. Better print message
             print "Orphaned client refresh"
+            print e

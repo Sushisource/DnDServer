@@ -14,13 +14,13 @@ class UserManager:
         ret.append(('ouser_response', {'name': name, 'id': uid}))
         return ret
 
-    def del_user(self, uid):
+    def _del_user(self, uid):
         print "Deleted user: " + self.users[uid]
         del self.users[uid]
 
-    def _send_ulist(self, id):
+    def _send_ulist(self, m_uid):
         ret = list()
         for uid, uname in self.users.items():
-            if uid is not id:
+            if uid is not m_uid:
                 ret.append(('ouser_response', {'name': uname, 'id': uid}, True))
         return ret

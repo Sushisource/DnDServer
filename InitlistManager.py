@@ -1,32 +1,30 @@
-class InitlistManager:
+from Manager import Manager
 
-    def __init__(self):
-        self.ilist_chars = {}
-        self.next_id = 0
-
+class InitlistManager(Manager):
     def add_inititem(self, data):
-         charname = data['name']
-         initiative = data['initiative']
-         if charname in self.ilist_chars:
-             self.ilist_chars[charname].initiative = initiative
-             return [('updatechar', self.ilist_chars[charname].to_dict())]
-         char = InitlistObject(charname, self.next_id)
-         self.next_id += 1
-         char.initiative = initiative
-         self.ilist_chars[charname] = char
-         return [('addchar', char.to_dict())]
+        charname = data['name']
+        initiative = data['initiative']
+        if charname in self.manageditems:
+            self.manageditems[charname].initiative = initiative
+            return [('updatechar', self.manageditems[charname].to_dict())]
+        char = InitlistObject(charname, self.next_itemid)
+        self.next_itemid += 1
+        char.initiative = initiative
+        self.manageditems[charname] = char
+        return [('addchar', char.to_dict())]
 
     def del_inititem(self, data):
-         charname = data['name']
-         dict = self.ilist_chars[charname].to_dict()
-         del self.ilist_chars[charname]
-         return [('delchar', dict)]
+        charname = data['name']
+        dict = self.manageditems[charname].to_dict()
+        del self.manageditems[charname]
+        return [('delchar', dict)]
 
-    def _send_initlist(self):
-         initlist = {}
-         for char in self.ilist_chars.values():
-             initlist[char.name] = char.to_dict()
-         return [('initlist', initlist, True)]
+    def _send_state(self):
+        initlist = {}
+        for char in self.manageditems.values():
+            initlist[char.name] = char.to_dict()
+        return [('initlist', initlist, True)]
+
 
 class InitlistObject:
     def __init__(self, name, m_id):

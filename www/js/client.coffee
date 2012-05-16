@@ -42,6 +42,10 @@ init_websocket = ->
   window.ws.onerror = (e) ->
     console.log "Error: " + e.message
 
+titlealert = (msg) ->
+  $j.titleAlert(msg, {requireBlur: true})
+
 $j ->
   init_websocket()
   $j.dnd.callbacks['echo'] = echo
+  $j.dnd.callbacks['titlealert'] = titlealert

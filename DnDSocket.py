@@ -1,4 +1,5 @@
 from ws4py.websocket import WebSocket
+from Commands import do_command
 from ws4py.messaging import TextMessage
 from json import dumps, loads
 import types
@@ -11,30 +12,27 @@ def callable(func):
     return func
 
 class DnDSocket(WebSocket):
-
     def __init__(self, sock, protocols=None, extensions=None, environ=None):
         super(DnDSocket, self).__init__(sock, protocols, extensions, environ)
 
     @callable
     def get_state(self, data):
-        greet = "Sending state\n"
-        self.send_message("echo", greet, True)
-        #Send the userlist
-        msgs = cpa.root.usermgr._send_ulist(self.m_uid)
-        #Send initiative list
-        msgs.extend(cpa.root.ilm._send_initlist())
-        #Send the storeables
-        msgs.extend(cpa.root.storem._send_storeables())
         #Welcome mat
         self.serverchat("Welcome to DnD Server %s!" % self.uname)
-        #Send all the messages we've built up
+        #Send state
+        msgs = self.produce_state()
         for msg in msgs:
             self.send_message(*msg)
 
     @callable
     def userchat(self, message):
-        msg = {'name': self.uname, 'msg': message['msg']}
-        self.send_message('chat', msg)
+        self.send_message('titlealert', "-- New chat --")
+        input = message['msg']
+        if input.startswith('/'):
+            do_command(input, self)
+        else:
+            msg = {'name': self.uname, 'msg': input}
+            self.send_message('chat', msg)
 
     @callable
     def dicebox(self, data):
@@ -46,6 +44,18 @@ class DnDSocket(WebSocket):
         self.send_message("diceroll",
                 {'result': result,
                  'name': self.uname})
+
+    def produce_state(self):
+        #Send state from every manager
+        msgs = list()
+        for manager in cpa.root.managers:
+            msgs.extend(manager._send_state())
+        cpa.root.dndstate = msgs
+        return msgs
+
+    def save_state(self):
+        for manager in cpa.root.managers:
+            manager._save_state()
 
     def received_message(self, message):
         if not message.is_binary:

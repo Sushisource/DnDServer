@@ -1,15 +1,15 @@
-from DnDSocket import DnDSocket
-import os, sys, inspect
+import os, sys, inspect, Spark, signal
+import cPickle as pickle
 import cherrypy as cp
 from ws4py.server.cherrypyserver import WebSocketPlugin, WebSocketTool
-from InitlistManager import InitlistManager
-import Spark
 from mako.lookup import TemplateLookup
+from DnDSocket import DnDSocket
+from InitlistManager import InitlistManager
 from StoreableManager import StoreableManager
 from UserManager import UserManager
 
 rootdir = os.path.abspath(os.path.join(os.path.dirname(__file__), 'www'))
-class Root(object):
+class DnDRoot(object):
     def __init__(self, host, port, ssl=False):
         self.host = host
         self.port = port
@@ -20,6 +20,7 @@ class Root(object):
         #Setup our managers. Foreach take their members and add a method of the same
         #name to it, but where we wrap the return value in a send message. This employs
         #the darkest of python magicks
+        self.managers = list()
         self.ilm = InitlistManager()
         self.add_mgr_methods_to_socket(self.ilm)
         self.storem = StoreableManager()
@@ -37,7 +38,12 @@ class Root(object):
         tuple in the return list of messages to send
 
         We dont add methods that start with a _ "ie: private methods"
+
+        Also we add them to our list of managers, so they'll send and save
+        state information.
         """
+        self.managers.append(manager)
+
         for ilf in inspect.getmembers(manager):
             if inspect.ismethod(ilf[1]) and not str.startswith(ilf[0],'_'):
                 def usethis(function):
@@ -76,9 +82,9 @@ if __name__ == '__main__':
     WebSocketPlugin(cp.engine).subscribe()
     cp.tools.websocket = WebSocketTool()
 
-    root = Root('127.0.0.1', port, False)
-
+    root = DnDRoot('127.0.0.1', port, False)
     cp.Application.root = root
+
     cp.quickstart(root, '', config={
         '/ws': {
             'tools.websocket.on': True,

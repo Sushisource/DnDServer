@@ -6,6 +6,10 @@ logbtn = $j '#login_okbtn'
 userlabel = $j '#user_label'
 $j.dnd.username = "Chief Ripnugget"
 
+$j.dnd.send = (fn, params = {}) ->
+  data = {fn: fn, data: params}
+  window.ws.send(JSON.stringify(data))
+
 $j ->
   logbtn.click ->
     loginbox.submit()

@@ -9,7 +9,6 @@
 </%block>
 <%block name="sidebar">
     <%include file="chatinbox.html"/>
-    <%include file="dicebox.html"/>
 </%block>
 <%block name="modals">
     <%include file="modals.html"/>

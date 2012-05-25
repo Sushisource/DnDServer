@@ -1,6 +1,8 @@
 .idea/
 .idea/*
+*.rc
+dndstate
 *.pyc
 *stackdump
 css/bootstrap.css
-js/*.js
+www/js/*.js

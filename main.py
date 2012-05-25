@@ -7,6 +7,7 @@ from DnDSocket import DnDSocket
 from InitlistManager import InitlistManager
 from StoreableManager import StoreableManager
 from UserManager import UserManager
+from Commands import CommandHandler
 
 rootdir = os.path.abspath(os.path.join(os.path.dirname(__file__), 'www'))
 class DnDRoot(object):
@@ -29,6 +30,8 @@ class DnDRoot(object):
         self.add_mgr_methods_to_socket(self.usermgr)
         self.dndfuncs = [x for x in inspect.getmembers(DnDSocket)
                          if inspect.ismethod(x[1]) and hasattr(x[1], 'is_callable')]
+        #Chat command handler
+        self.cmdh = CommandHandler()
 
     def add_mgr_methods_to_socket(self, manager):
         """
@@ -56,6 +59,13 @@ class DnDRoot(object):
                 retme = usethis(ilf[1])
                 retme.__name__ = ilf[0]
                 setattr(DnDSocket, ilf[0], retme)
+
+    def reset(self):
+        """
+        Resets the managers to blank state
+        """
+        for manager in self.managers:
+            manager._reset()
 
     @cp.expose
     def index(self):

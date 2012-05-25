@@ -1,11 +1,9 @@
 from ws4py.websocket import WebSocket
-from Commands import do_command
 from ws4py.messaging import TextMessage
 from json import dumps, loads
 import types
 import cherrypy as cp
 from cherrypy import Application as cpa
-from Roller import rollDice
 
 def callable(func):
     func.is_callable = True
@@ -18,7 +16,7 @@ class DnDSocket(WebSocket):
     @callable
     def get_state(self, data):
         #Welcome mat
-        self.serverchat("Welcome to DnD Server %s!" % self.uname)
+        self.serverchat("Welcome to DnD Server {0}!".format(self.uname))
         #Send state
         msgs = self.produce_state()
         for msg in msgs:
@@ -29,21 +27,15 @@ class DnDSocket(WebSocket):
         self.send_message('titlealert', "-- New chat --")
         input = message['msg']
         if input.startswith('/'):
-            do_command(input, self)
+            cpa.root.cmdh.do_command(input, self)
         else:
             msg = {'name': self.uname, 'msg': input}
             self.send_message('chat', msg)
 
     @callable
-    def dicebox(self, data):
-        rollstr = data['rollstr']
-        result = rollDice(rollstr)
-        tlok = cpa.root.tlok
-        result = tlok.get_template('diceresult.mako').render(query=rollstr,
-            total=result)
-        self.send_message("diceroll",
-                {'result': result,
-                 'name': self.uname})
+    def reset(self, reason):
+        print "Resetting because {0}".format(reason)
+        cpa.root.reset()
 
     def produce_state(self):
         #Send state from every manager

@@ -16,3 +16,5 @@ class Manager:
     def _save_state(self):
         pass
 
+    def _reset(self):
+        self.__init__()

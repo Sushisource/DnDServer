@@ -1,4 +1,5 @@
 import unittest, sys, os
+import time
 from selenium import webdriver
 from selenium.webdriver.support.wait import WebDriverWait
 
@@ -24,13 +25,18 @@ class BrowserTests(unittest.TestCase):
     def tearDown(self):
         pass
 
+    def waitabeat(self):
+        def waiter(passthis):
+            time.sleep(.5)
+            return True
+        WebDriverWait(cd, 10).until(waiter)
+        #Make sure name field has focus
+
     def formfiller(self, btnid, startid, *fields):
         add = cd.find_element_by_id(btnid)
         name = cd.find_element_by_id(startid)
-        #Last dialog could still be up
-        WebDriverWait(cd, 3).until(
-            lambda driver : not name.is_displayed())
-        #Make sure name field has focus
+        #Last dialog could still be up, wait a beat
+        self.waitabeat()
         add.click()
         WebDriverWait(cd, 3).until(
             lambda driver : name.is_displayed())
@@ -78,7 +84,21 @@ class CharTest(BrowserTests):
     def runTest(self):
         self.chars = 0
         self.addchar("Sooshknight", 100)
+        self.addchar("O_0", 50)
+        self.addattack(0,'Sword','20d6 + 4')
+        self.addattack(1,'Club','5d10 + 10')
 
     def addchar(self, name, hp):
         self.formfiller('newchar_btn', 'addchar_m_name', name, hp)
         name = cd.find_element_by_id('addchar_m_name')
+        self.assertTrue(cd.find_element_by_id('char_{0}'.format(self.chars)))
+        self.chars += 1
+
+    def addattack(self, id, name, cmd):
+        btnname = "char_addatk_{0}".format(id)
+        self.formfiller(btnname, 'addatk_m_name', name, cmd)
+        atkln = cd.find_element_by_partial_link_text(name)
+        self.waitabeat()
+        atkln.click()
+        self.assertTrue(atkln)
+

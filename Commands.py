@@ -39,6 +39,9 @@ class CommandHandler:
 
     @callable
     def d(self, dnd, dicestr):
+        """
+        Dicebox command
+        """
         tlok = cpa.root.tlok
         result = rollDice(dicestr)
         result = tlok.get_template('diceresult.mako').render(query=dicestr,

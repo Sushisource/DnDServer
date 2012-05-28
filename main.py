@@ -1,4 +1,4 @@
-import os, sys, inspect, Spark, signal
+import os, sys, inspect, signal
 import cPickle as pickle
 import cherrypy as cp
 from ws4py.server.cherrypyserver import WebSocketPlugin, WebSocketTool
@@ -74,12 +74,6 @@ class DnDRoot(object):
     @cp.expose
     def ws(self):
         cp.log("Handler created: %s" % repr(cp.request.ws_handler))
-
-    @cp.expose
-    def dicehisto(self, list, **args):
-        cp.response.headers['Content-Type'] = 'image/png'
-        list = [int(x) for x in list.split(',')]
-        return Spark.plot_sparkline_discrete(list,args,True)
 
 if __name__ == '__main__':
     port = 9000

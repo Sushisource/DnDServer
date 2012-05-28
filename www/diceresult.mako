@@ -3,16 +3,18 @@ Rolls ${query}:</br>
 % for graph in graphs:
     <svg id="g${graph['id']}" class="dicebar"></svg><br>
     <script type="text/javascript">
+        (function() {
         var data = ${graph['rolls']};
         var max = d3.max(data);
         var ticks = d3.min([10,max]);
+        var width = 405;
         var y = d3.scale.linear()
             .domain([0, max]).range([0, 100]);
         var x = d3.scale.ordinal()
-            .domain(d3.range(0,data.length)).rangeRoundBands([0, 405],.01);
+            .domain(d3.range(0,data.length)).rangeRoundBands([0, width]);
         var gr = d3.select("#g${graph['id']}");
         gr = gr.append("g").attr("transform", "translate(10,10)");
-        var wid = 405 / data.length - 2;
+        var wid = width / data.length - 2;
         gr.selectAll("line")
             .data(y.ticks(ticks))
             .enter().append("line")
@@ -28,7 +30,9 @@ Rolls ${query}:</br>
             .attr('x', function(datum, index) {return x(index)})
             .attr("height", 0)
             .transition()
-            .duration(750)
+            .delay(function(d, i) { return i / data.length * 800; })
+            .duration(800)
+            .ease(d3.ease('exp-in-out'))
             .attr('y', function(dat) {return 100 - y(dat)})
             .attr("height", y);
         if(data.length<=20) //Label sides if die <=d20
@@ -52,5 +56,7 @@ Rolls ${query}:</br>
                 .attr("text-anchor", "right")
                 .text(function (datum, index) {
                     return (datum).toString()});
+
+        }).call(this);
     </script>
 % endfor

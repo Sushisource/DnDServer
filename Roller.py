@@ -1,3 +1,4 @@
+import uuid
 import random
 import re
 __author__ = 'Spencer Judge'
@@ -12,20 +13,22 @@ def doRolls(numdice, sides):
 
 def rollDice(dieReq):
     result = "err"
-    additional = [""]
+    graphs = list()
 
     def diceSub(diestr):
         (numdice, sides) = diestr.group(0).split('d')
         rolls = doRolls(numdice, sides)
+        aggrolls = [0 for x in range(1,int(sides) + 1)]
+        for roll in rolls:
+            aggrolls[roll-1] += 1
         summ = sum(rolls)
         if 3<int(numdice)<200:
-            rolls = ','.join(map(str, rolls)) #Make rolls into comma list
-            additional[0] += "<img src='dicehisto?list=%s&width=10&" \
-            "height=50&limits=0,%s&upper=%s'>" \
-        % (rolls,sides,sides)
+            graphs.append({'max': sides,
+                           'id': uuid.uuid4(),
+                           'rolls': aggrolls})
         return str(summ)
     try:
         result = str(eval(re.sub('(\d+d\d+)', diceSub, dieReq)))
     except Exception as e:
         print e
-    return "<h4>" + result + "</h4>" + additional[0]
+    return "<h4>" + result + "</h4>", graphs

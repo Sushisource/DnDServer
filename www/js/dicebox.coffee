@@ -9,4 +9,7 @@ $j.dnd.diceroll = (roll) ->
   chat.val "/d " + roll
   chat.submit()
 
+$j.dnd.fancydice = (data) ->
+
+
 $j.dnd.callbacks['diceroll'] = diceroll

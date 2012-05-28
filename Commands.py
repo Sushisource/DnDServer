@@ -43,8 +43,9 @@ class CommandHandler:
         Dicebox command
         """
         tlok = cpa.root.tlok
-        result = rollDice(dicestr)
+        result, graphs = rollDice(dicestr)
         result = tlok.get_template('diceresult.mako').render(query=dicestr,
+            graphs=graphs,
             total=result)
         dnd.send_message("diceroll",
                 {'result': result,

@@ -66,6 +66,7 @@ class DiceTest(BrowserTests):
         chat_in.send_keys("/d 20d20\n")
         chat_in.send_keys("/d 20d20 + 300d5\n")
         chat_in.send_keys("/d 20\n")
+        chat_in.send_keys("/d 20d5 + 6d10\n")
 
 class InitiativeTest(BrowserTests):
     def runTest(self):

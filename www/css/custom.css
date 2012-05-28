@@ -79,3 +79,22 @@
     font-size: 14px;
     font-weight: bold;
 }
+
+.dicebar {
+    width:430px;
+    height:110px;
+    shape-rendering: crispEdges;
+}
+
+.dicebar rect {
+    fill: steelblue;
+    stroke: black;
+}
+
+.dicebar line {
+    stroke: rgba(255,255,255,0.6);
+}
+
+.dicebar text {
+    fill: lightgray;
+}

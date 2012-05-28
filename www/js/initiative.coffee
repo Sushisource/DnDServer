@@ -1,5 +1,3 @@
-$j = jQuery
-
 initadd = $j '#init_add'
 addmodal = $j '#addinit_item'
 addchar = $j '#addinit_add'
@@ -50,40 +48,40 @@ sort_initlist = ->
   $j.each listitems, ->
     initiativelist.append listitems
 
-add_char = (char) ->
-  item = "<li id='init_i_#{char.id}' class='hide initchar'><div class='pull-right' style='margin-top:5px;'>"
-  item += "<a class='badge badge-inverse' id='init_#{char.id}'>#{char.init}</a>"
-  item += """<a id='init_del_#{char.id}' class='btn' href=#
+add_char = (ichar) ->
+  item = "<li id='init_i_#{ichar.cid}' class='hide initchar'><div class='pull-right' style='margin-top:5px;'>"
+  item += "<a class='badge badge-inverse' id='init_#{ichar.cid}'>#{ichar.init}</a>"
+  item += """<a id='init_del_#{ichar.cid}' class='btn' href=#
                   style='padding:2px; height:15px; width:15px; margin:0 5px;'>
                   <i class='icon-trash'></i>
                 </a></div>"""
-  item += "<a href='#'>#{char.name}</a></li>"
+  item += "<a href='#'>#{ichar.name}</a></li>"
   initiativelist.append(item).children(':last').fadeIn(200)
   #Add function handles to buttons / badge
-  $j("#init_del_#{char.id}").click ->
-    $j.dnd.send "del_inititem", {name: char.name}
-  $j("#init_#{char.id}").click ->
-    change_init char
+  $j("#init_del_#{ichar.cid}").click ->
+    $j.dnd.send "del_inititem", {name: ichar.name}
+  $j("#init_#{ichar.cid}").click ->
+    change_init ichar
   sort_initlist()
 
-upd_char = (char) ->
-  $j("#init_#{char.id}").html char.init
+upd_char = (ichar) ->
+  $j("#init_#{ichar.cid}").html ichar.init
   sort_initlist()
 
-del_char = (char) ->
-  $j("#init_i_#{char.id}").fadeOut ->
-    $j("#init_i_#{char.id}").remove()
+del_char = (ichar) ->
+  $j("#init_i_#{ichar.cid}").fadeOut ->
+    $j("#init_i_#{ichar.cid}").remove()
 
-change_init = (char) ->
-  charname_input.val char.name
-  initiative_input.val $j("#init_#{char.id}").html()
+change_init = (ichar) ->
+  charname_input.val ichar.name
+  initiative_input.val $j("#init_#{ichar.cid}").html()
   addmodal.on 'shown', ->
     initiative_input.focus().select()
   addmodal.modal 'toggle'
 
 init_initlist = (chars) ->
   initiativelist.children('.initchar').remove()
-  for char, charobj of chars
+  for ichar, charobj of chars
     add_char(charobj)
 
 $j.dnd.callbacks['initlist'] = init_initlist

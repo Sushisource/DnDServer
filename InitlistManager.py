@@ -33,5 +33,5 @@ class InitlistObject:
         self.id = m_id
 
     def to_dict(self):
-        ret = {'name': self.name, 'init': self.initiative, 'id': self.id}
+        ret = {'name': self.name, 'init': self.initiative, 'cid': self.id}
         return ret

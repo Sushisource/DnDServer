@@ -1,5 +1,3 @@
-$j = jQuery
-
 loginbox = $j '#login_form'
 loginput = $j '#uname'
 logbtn = $j '#login_okbtn'

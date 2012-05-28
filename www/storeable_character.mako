@@ -6,11 +6,11 @@
     <h3>Attacks:</h3>
     % for name, command in data['attack'].items():
             <div class="clickrow">
-                <a onclick="jQuery.dnd.doAttack('${name}','${command}','${root['name']}')"
+                <a onclick="$j.dnd.doAttack('${name}','${command}','${root['name']}')"
                    href="#">
                     ${name}:</a>
                 <i>${command}</i>
-                <a onclick="jQuery.dnd.editAttack(${id},'${name}','${command}')"
+                <a onclick="$j.dnd.editAttack(${id},'${name}','${command}')"
                    href="#"
                    class="icon-edit pull-right"></a>
             </div>

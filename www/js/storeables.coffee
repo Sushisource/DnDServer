@@ -1,5 +1,3 @@
-$j = jQuery
-
 boxarena = $j '#boxarena'
 
 $j ->

@@ -1,4 +1,4 @@
-$j = jQuery
+window["$j"] = jQuery
 $j.dnd = {}
 $j.dnd.callbacks = {}
 

@@ -1,5 +1,3 @@
-$j = jQuery
-
 newcharform = $j '#addchar_m_form'
 newcharbtn = $j '#newchar_btn'
 modal = $j '#addchar_modal'
@@ -51,27 +49,27 @@ updatehp = (pass, text, orig) ->
   $j.dnd.updatestoreable(id, data)
   return text
 
-setupchar = (id) ->
-  hp = $j("#char_hp_#{id}")
-  hp.attr('idnum', id)
+setupchar = (charid) ->
+  hp = $j("#char_hp_#{charid}")
+  hp.attr('idnum', charid)
 
-  $j("#char_hp_#{id}").editInPlace({
+  $j("#char_hp_#{charid}").editInPlace({
     default_text: hp.html()
     callback: updatehp,
-    element_id: id,
+    element_id: charid,
     bg_over: '#3A87AD',
     bg_out: hp.css('background-color')})
 
-  $j("#char_addatk_#{id}").click ->
+  $j("#char_addatk_#{charid}").click ->
     atkname.val ""
     atkcmd.val ""
-    atkid.html id
+    atkid.html charid
     atkmodal.modal('toggle')
 
-$j.dnd.editAttack = (id, name, cmd) ->
+$j.dnd.editAttack = (atkid, name, cmd) ->
   atkname.val name
   atkcmd.val cmd
-  atkid.html id
+  atkid.html atkid
   atkmodal.modal 'toggle'
 
 $j.dnd.doAttack = (name,cmd,wielder) ->

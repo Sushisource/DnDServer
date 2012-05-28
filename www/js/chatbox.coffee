@@ -1,5 +1,3 @@
-$j = jQuery
-
 chatbox = $j '#chatbox'
 chatinbox = $j '#chat_form'
 chatinput = $j '#chat_in'

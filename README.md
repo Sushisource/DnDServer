@@ -13,3 +13,5 @@ Then just run main.py and you should be good to go!
 
 ##Compatability
 Python 2.7+ PyPy1.8+
+
+Chrome works best by FAR. Firefox works, but not nearly as nicely as I'd like.

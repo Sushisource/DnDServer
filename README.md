@@ -8,6 +8,8 @@ Do not, under any circumstance, expose this server to the internet. It will not 
 ##Running
 You'll need [ws4py](https://github.com/Lawouach/WebSocket-for-Python) and [cherrypy](http://cherrypy.org/) as well as [mako](http://www.makotemplates.org/)
 
+The [coffeescript compiler](http://coffeescript.org/) is needed to compile the javascript.
+
 You'll need to modify client.coffee to have the right IP for the websocket connection to the server.
 Then just run main.py and you should be good to go!
 

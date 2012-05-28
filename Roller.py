@@ -12,8 +12,9 @@ def doRolls(numdice, sides):
     return rolls
 
 def rollDice(dieReq):
-    result = "err"
+    result = False
     graphs = list()
+    single = {'draw': False}
 
     def diceSub(diestr):
         (numdice, sides) = diestr.group(0).split('d')
@@ -26,9 +27,12 @@ def rollDice(dieReq):
             graphs.append({'max': sides,
                            'id': uuid.uuid4(),
                            'rolls': aggrolls})
+        if int(numdice) == 1:
+            single['draw'] = True
+            single['sides'] = sides
         return str(summ)
     try:
-        result = str(eval(re.sub('(\d+d\d+)', diceSub, dieReq)))
+        result = int(eval(re.sub('(\d+d\d+)', diceSub, dieReq)))
     except Exception as e:
         print e
-    return "<h4>" + result + "</h4>", graphs
+    return result, graphs, single

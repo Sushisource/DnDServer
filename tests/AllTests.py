@@ -63,9 +63,10 @@ class ChatTest(BrowserTests):
 class DiceTest(BrowserTests):
     def runTest(self):
         chat_in = cd.find_element_by_id('chat_in')
-        chat_in.send_keys("/d 20d20\n")
-        chat_in.send_keys("/d 20d20 + 300d5\n")
-        chat_in.send_keys("/d 20\n")
+        chat_in.send_keys("/d 199d20\n")
+        chat_in.send_keys("/d 6d6 + 300d5\n")
+        chat_in.send_keys("/d 1d20\n")
+        chat_in.send_keys("/d 1d10\n")
         chat_in.send_keys("/d 20d5 + 6d10\n")
 
 class InitiativeTest(BrowserTests):

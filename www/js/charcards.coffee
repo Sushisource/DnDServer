@@ -66,10 +66,10 @@ setupchar = (charid) ->
     atkid.html charid
     atkmodal.modal('toggle')
 
-$j.dnd.editAttack = (atkid, name, cmd) ->
+$j.dnd.editAttack = (m_atkid, name, cmd) ->
   atkname.val name
   atkcmd.val cmd
-  atkid.html atkid
+  atkid.html m_atkid
   atkmodal.modal 'toggle'
 
 $j.dnd.doAttack = (name,cmd,wielder) ->
